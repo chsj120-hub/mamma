@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>디자인 시스템 · 테마</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 880px; height: 844px; box-sizing: border-box; padding: 48px; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; gap: 28px">
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <span style="font-size: 13px; font-weight: 600; color: #6B5A4A; letter-spacing: 1px">DESIGN SYSTEM</span>
+    <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 40px; font-weight: 400">따뜻하고 직관적인 부모 중심 UI</h1>
+  </div>
+
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="margin: 0; font-size: 16px; font-weight: 700">테마 팔레트 · 설정에서 실시간 전환</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+      <sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+        <article style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <span style="font-size: 15px; font-weight: 700">{{t.name}}</span>
+            <sc-if value="{{t.isDefault}}" hint-placeholder-val="{{ false }}">
+              <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: #2B2118; color: #FFFFFF">기본값</span>
+            </sc-if>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+            <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 44px; border-radius: 10px; background: {{t.accent}}"></div><span style="font-size: 11px; color: #5C4A3A">{{t.accent}}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 44px; border-radius: 10px; background: {{t.soft}}; border: 1px solid #EFE4D6"></div><span style="font-size: 11px; color: #5C4A3A">{{t.soft}}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 44px; border-radius: 10px; background: {{t.ink}}"></div><span style="font-size: 11px; color: #5C4A3A">{{t.ink}}</span></div>
+          </div>
+          <div style="background: {{t.soft}}; border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between">
+            <span style="font-family: 'Jua', sans-serif; font-size: 24px; color: {{t.ink}}">D+224</span>
+            <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: {{t.ink}}; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center">식단 보기</span>
+          </div>
+          <span style="font-size: 12px; color: #5C4A3A; line-height: 1.5">{{t.mood}}</span>
+        </article>
+      </sc-for>
+    </div>
+  </section>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700">타이포그래피</h2>
+      <div style="display: flex; align-items: baseline; gap: 12px"><span style="font-family: 'Jua', sans-serif; font-size: 34px">맘마 D+224</span><span style="font-size: 12px; color: #5C4A3A">Jua · 숫자·제목</span></div>
+      <div style="display: flex; align-items: baseline; gap: 12px"><span style="font-size: 18px; font-weight: 700">오늘의 식단</span><span style="font-size: 12px; color: #5C4A3A">Plex Sans KR 700 · 18</span></div>
+      <div style="display: flex; align-items: baseline; gap: 12px"><span style="font-size: 14px">쌀죽 · 소고기 · 애호박 · 양파</span><span style="font-size: 12px; color: #5C4A3A">400 · 14</span></div>
+      <div style="display: flex; align-items: baseline; gap: 12px"><span style="font-size: 12px; color: #6B5A4A">1회 목표 80ml · 하루 2회</span><span style="font-size: 12px; color: #5C4A3A">400 · 12 보조</span></div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700">상태 컬러 · 테마와 무관하게 고정</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: #15803D; color: #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>완료</span>
+        <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid #EFE4D6; font-size: 13px; font-weight: 700; display: flex; align-items: center">예정</span>
+        <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: #B91C1C; color: #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center">D-1 임박</span>
+        <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: #FFF7ED; border: 1.5px solid #FDBA74; color: #9A3412; font-size: 13px; font-weight: 700; display: flex; align-items: center">재고 부족</span>
+        <span style="height: 36px; padding: 0 12px; border-radius: 18px; background: #F3E8FF; color: #6B21A8; font-size: 13px; font-weight: 700; display: flex; align-items: center">알레르기 테스트</span>
+      </div>
+      <p style="margin: 4px 0 0; font-size: 12px; color: #5C4A3A; line-height: 1.6">경고(빨강)와 완료(초록)는 색만이 아니라 아이콘·문구·명도로도 구분됩니다. 테마 포인트 컬러는 장식·진행 바에만 쓰고, 글자는 진한 잉크 컬러로 4.5:1 대비를 맞춥니다.</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":880,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      themes: [
+        { name: 'Warm Amber', isDefault: true, accent: '#F59E0B', soft: '#FEF3C7', ink: '#92400E', mood: '따뜻하고 친근한 가정식 이유식 분위기' },
+        { name: 'Soft Blue', isDefault: false, accent: '#3B82F6', soft: '#DBEAFE', ink: '#1E40AF', mood: '산뜻하고 신뢰감 있는 헬스케어 스타일' },
+        { name: 'Nature Green', isDefault: false, accent: '#10B981', soft: '#D1FAE5', ink: '#065F46', mood: '유기농 식재료의 싱그러운 친환경 스타일' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

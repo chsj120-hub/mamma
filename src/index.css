@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* 테마 3종 — accent(장식·진행 바) / soft(배경 강조) / ink(글자). 글자색은 반드시 ink 사용 */
+:root,
+[data-theme="amber"] {
+  --theme-accent: #f59e0b;
+  --theme-soft: #fef3c7;
+  --theme-ink: #92400e;
+}
+[data-theme="blue"] {
+  --theme-accent: #3b82f6;
+  --theme-soft: #dbeafe;
+  --theme-ink: #1e40af;
+}
+[data-theme="green"] {
+  --theme-accent: #10b981;
+  --theme-soft: #d1fae5;
+  --theme-ink: #065f46;
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans KR", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Jua", "IBM Plex Sans KR", sans-serif;
+
+  /* 테마 색상 (런타임 전환) */
+  --color-accent: var(--theme-accent);
+  --color-soft: var(--theme-soft);
+  --color-ink: var(--theme-ink);
+
+  /* 공통 토큰 */
+  --color-bg: #fffbf5;
+  --color-card: #ffffff;
+  --color-line: #efe4d6;
+  --color-text: #2b2118;
+  --color-sub: #5c4a3a;
+  --color-muted: #6b5a4a;
+
+  /* 상태 컬러 (테마 무관 고정) */
+  --color-track: #f3ebe0;
+  --color-done: #15803d;
+  --color-done-bg: #f0fdf4;
+  --color-done-line: #16a34a;
+  --color-urgent: #b91c1c;
+  --color-urgent-bg: #fef2f2;
+  --color-urgent-line: #fecaca;
+  --color-urgent-strong-line: #fca5a5;
+  --color-urgent-ink: #991b1b;
+  --color-urgent-sub: #7f1d1d;
+  --color-dot: #dc2626;
+  --color-allergy-bar: #7e22ce;
+  --color-allergy-soft: #faf5ff;
+  --color-allergy-ring: #c084fc;
+  --color-done-soft-line: #86efac;
+  --color-done-pale-line: #bbf7d0;
+  --color-plan-dot: #d6c7b4;
+  --color-bar-off: #e7d9c5;
+  --color-sat: #1d4ed8;
+  --color-low: #9a3412;
+  --color-low-bg: #fff7ed;
+  --color-low-line: #fdba74;
+  --color-low-soft-line: #fed7aa;
+  --color-allergy: #6b21a8;
+  --color-allergy-bg: #f3e8ff;
+
+  --radius-card: 20px;
+}
+
+html,
+body {
+  background: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  word-break: keep-all; /* 한글 단어 중간에서 줄바꿈하지 않기 */
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* 완료 체크 애니메이션 */
+@keyframes pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.animate-pop {
+  animation: pop 0.32s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop { animation: none; }
+}
+
+/* 출력: 화면에서는 인쇄용 문서를 숨기고, 인쇄할 때는 앱 대신 그 문서만 */
+#print-root {
+  display: none;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  #root {
+    display: none !important;
+  }
+  #print-root {
+    display: block !important;
+  }
+}

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>성장 리포트</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+  <header style="padding: 20px 20px 12px; display: flex; align-items: center; justify-content: space-between">
+    <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 26px; font-weight: 400">성장 리포트</h1>
+    <span style="font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 14px; background: #FEF3C7; color: #92400E">10월 4주차</span>
+  </header>
+
+  <div style="flex: 1; overflow-y: auto; padding: 0 20px 110px; display: flex; flex-direction: column; gap: 14px">
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700">이유식 단계</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 8px; border-radius: 4px; background: #15803D"></div>
+          <span style="font-size: 13px; font-weight: 700">초기</span>
+          <span style="font-size: 11px; color: #5C4A3A">4~6개월 · 미음</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 8px; border-radius: 4px; background: #F3EBE0; overflow: hidden"><div style="width: 55%; height: 100%; background: #F59E0B"></div></div>
+          <span style="font-size: 13px; font-weight: 700; color: #92400E">중기 · 지금</span>
+          <span style="font-size: 11px; color: #5C4A3A">7~9개월 · 죽</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 8px; border-radius: 4px; background: #F3EBE0"></div>
+          <span style="font-size: 13px; font-weight: 700; color: #6B5A4A">후기·완료기</span>
+          <span style="font-size: 11px; color: #5C4A3A">10~12개월 · 진밥</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 700">주간 섭취량</h2>
+        <span style="font-size: 13px; color: #5C4A3A">목표 160ml / 일</span>
+      </div>
+      <div style="height: 120px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; border-bottom: 1px solid #EFE4D6">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%">
+            <span style="font-size: 10px; color: #5C4A3A">{{b.v}}</span>
+            <div style="width: 100%; height: {{b.h}}; border-radius: 6px 6px 0 0; background: {{b.fill}}"></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: -4px">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+          <span style="text-align: center; font-size: 12px; color: #6B5A4A">{{b.d}}</span>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 14px; font-size: 12px; color: #5C4A3A">
+        <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #F59E0B"></span>철분(소고기) 포함 · 5일</span>
+        <span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #E7D9C5"></span>미포함</span>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700">알레르기 테스트 기록</h2>
+      <sc-for list="{{allergens}}" as="a" hint-placeholder-count="5">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #F3EBE0">
+          <span style="font-size: 14px; font-weight: 600">{{a.name}}</span>
+          <span style="font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: {{a.bg}}; color: {{a.ink}}">{{a.status}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 700">중기 마일스톤</h2>
+        <span style="font-size: 13px; font-weight: 700; color: #92400E">{{checkedCount}} / {{total}}</span>
+      </div>
+      <sc-for list="{{milestones}}" as="m" hint-placeholder-count="5">
+        <label style="min-height: 44px; display: flex; align-items: center; gap: 12px; font-size: 14px; cursor: pointer; color: {{m.ink}}">
+          <input type="checkbox" checked="{{m.checked}}" onChange="{{m.toggle}}" style="width: 22px; height: 22px; margin: 0; accent-color: #15803D; flex-shrink: 0">
+          <span style="text-decoration: {{m.deco}}">{{m.text}}</span>
+        </label>
+      </sc-for>
+    </section>
+  </div>
+
+  <nav aria-label="하단 메뉴" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; box-sizing: border-box; padding: 8px 12px 20px; background: #FFFFFF; border-top: 1px solid #EFE4D6; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>홈</a>
+    <a href="Planner.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>식단</a>
+    <a href="Cube.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>홈큐브</a>
+    <a href="Report.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #92400E; font-size: 11px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>성장 리포트</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { checked: { 0: true, 1: true, 2: false, 3: true, 4: false } };
+  }
+  renderVals() {
+    const raw = [
+      { d: '월', v: 150, iron: true }, { d: '화', v: 160, iron: true }, { d: '수', v: 120, iron: false },
+      { d: '목', v: 165, iron: true }, { d: '금', v: 140, iron: true }, { d: '토', v: 110, iron: false },
+      { d: '일', v: 155, iron: true }
+    ];
+    const bars = raw.map((b) => ({ d: b.d, v: b.v, h: Math.round(b.v / 180 * 96) + 'px', fill: b.iron ? '#F59E0B' : '#E7D9C5' }));
+    const al = [
+      { name: '쌀', s: 'ok' }, { name: '소고기', s: 'ok' }, { name: '밀가루', s: 'ok' },
+      { name: '계란노른자', s: 'run', note: '진행 중 2/3일' }, { name: '땅콩', s: 'plan' }
+    ];
+    const allergens = al.map((a) => ({
+      name: a.name,
+      status: a.s === 'ok' ? '이상 없음' : a.s === 'run' ? a.note : '예정',
+      bg: a.s === 'ok' ? '#F0FDF4' : a.s === 'run' ? '#F3E8FF' : '#F3EBE0',
+      ink: a.s === 'ok' ? '#15803D' : a.s === 'run' ? '#6B21A8' : '#5C4A3A'
+    }));
+    const texts = [
+      '두부처럼 부드러운 덩어리를 혀로 으깬다',
+      '숟가락을 보면 스스로 입을 벌린다',
+      '컵으로 물 마시기를 연습한다',
+      '하루 2회 이유식이 자리 잡았다',
+      '손으로 음식을 집으려 한다'
+    ];
+    let checkedCount = 0;
+    const milestones = texts.map((text, i) => {
+      const checked = !!this.state.checked[i];
+      if (checked) checkedCount++;
+      return {
+        text, checked,
+        ink: checked ? '#5C4A3A' : '#2B2118',
+        deco: checked ? 'line-through' : 'none',
+        toggle: () => this.setState({ checked: { ...this.state.checked, [i]: !checked } })
+      };
+    });
+    return { bars, allergens, milestones, checkedCount, total: texts.length };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>홈큐브 보관함</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+  <header style="padding: 20px 20px 12px; display: flex; align-items: center; justify-content: space-between">
+    <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 26px; font-weight: 400">홈큐브 보관함</h1>
+    <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: none; background: #92400E; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>큐브 추가</button>
+  </header>
+
+  <div style="flex: 1; overflow-y: auto; padding: 0 20px 110px; display: flex; flex-direction: column; gap: 14px">
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #6B5A4A">보관 중</span>
+        <span style="font-family: 'Jua', sans-serif; font-size: 26px">32<span style="font-size: 14px">개</span></span>
+      </div>
+      <div style="background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #9A3412">재고 부족</span>
+        <span style="font-family: 'Jua', sans-serif; font-size: 26px; color: #9A3412">3<span style="font-size: 14px">종</span></span>
+      </div>
+      <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #991B1B">기한 임박</span>
+        <span style="font-family: 'Jua', sans-serif; font-size: 26px; color: #991B1B">2<span style="font-size: 14px">종</span></span>
+      </div>
+    </div>
+
+    <div role="tablist" aria-label="재료 분류" style="display: flex; gap: 6px; flex-wrap: wrap">
+      <button role="tab" aria-selected="true" style="height: 40px; padding: 0 16px; border-radius: 20px; border: none; background: #2B2118; color: #FFFFFF; font-size: 13px; font-weight: 700">전체</button>
+      <button role="tab" aria-selected="false" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #EFE4D6; background: #FFFFFF; color: #2B2118; font-size: 13px; font-weight: 500">고기</button>
+      <button role="tab" aria-selected="false" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #EFE4D6; background: #FFFFFF; color: #2B2118; font-size: 13px; font-weight: 500">채소</button>
+      <button role="tab" aria-selected="false" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #EFE4D6; background: #FFFFFF; color: #2B2118; font-size: 13px; font-weight: 500">과일</button>
+      <button role="tab" aria-selected="false" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #EFE4D6; background: #FFFFFF; color: #2B2118; font-size: 13px; font-weight: 500">곡물</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{cubes}}" as="c" hint-placeholder-count="8">
+        <article style="background: #FFFFFF; border: 1.5px solid {{c.border}}; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; position: relative">
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <span style="width: 34px; height: 34px; border-radius: 10px; background: {{c.swatch}}; display: block" aria-hidden="true"></span>
+            <span style="font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: {{c.dBg}}; color: {{c.dInk}}">{{c.dday}}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; font-weight: 700">{{c.name}}</span>
+            <span style="font-size: 12px; color: #6B5A4A">{{c.cat}} · {{c.made}} 제조</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <span style="font-family: 'Jua', sans-serif; font-size: 22px">{{c.qty}}<span style="font-size: 13px">개</span></span>
+            <sc-if value="{{c.low}}" hint-placeholder-val="{{ false }}">
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #9A3412">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4"></path></svg>부족</span>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+
+  <nav aria-label="하단 메뉴" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; box-sizing: border-box; padding: 8px 12px 20px; background: #FFFFFF; border-top: 1px solid #EFE4D6; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>홈</a>
+    <a href="Planner.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>식단</a>
+    <a href="Cube.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #92400E; font-size: 11px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>홈큐브</a>
+    <a href="Report.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>성장 리포트</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const raw = [
+      { name: '소고기', cat: '고기', made: '10.08', qty: 1, d: 2, swatch: '#B4534A' },
+      { name: '브로콜리', cat: '채소', made: '10.14', qty: 4, d: 1, swatch: '#4D7C3A' },
+      { name: '애호박', cat: '채소', made: '10.20', qty: 6, d: 7, swatch: '#9BBF5A' },
+      { name: '닭고기', cat: '고기', made: '10.19', qty: 1, d: 13, swatch: '#E8C8A0' },
+      { name: '단호박', cat: '채소', made: '10.22', qty: 5, d: 9, swatch: '#E89B2E' },
+      { name: '시금치', cat: '채소', made: '10.24', qty: 1, d: 11, swatch: '#2F6B3A' },
+      { name: '쌀죽 베이스', cat: '곡물', made: '10.25', qty: 8, d: 12, swatch: '#EFE6D4' },
+      { name: '배', cat: '과일', made: '10.23', qty: 6, d: 10, swatch: '#E6DB9C' }
+    ];
+    const cubes = raw.map((c) => {
+      const urgent = c.d <= 3;
+      const low = c.qty < 2;
+      return {
+        ...c,
+        low,
+        dday: 'D-' + c.d,
+        dBg: urgent ? '#B91C1C' : '#F3EBE0',
+        dInk: urgent ? '#FFFFFF' : '#5C4A3A',
+        border: urgent ? '#FCA5A5' : low ? '#FDBA74' : '#EFE4D6'
+      };
+    });
+    return { cubes };
+  }
+}
+</script>
+</body>
+</html>

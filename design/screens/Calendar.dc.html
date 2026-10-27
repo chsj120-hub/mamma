@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>월간 캘린더</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+  <header style="padding: 20px 20px 10px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 26px; font-weight: 400">식단 플래너</h1>
+      <div role="group" aria-label="보기 전환" style="display: flex; background: #F3EBE0; border-radius: 22px; padding: 4px">
+        <button aria-pressed="true" style="height: 36px; padding: 0 14px; border: none; border-radius: 18px; background: #FFFFFF; font-size: 13px; font-weight: 700; color: #92400E; box-shadow: 0 1px 2px rgba(43,33,24,0.12)">월간</button>
+        <a href="Planner.dc.html" style="height: 36px; padding: 0 14px; border-radius: 18px; font-size: 13px; font-weight: 600; color: #6B5A4A; text-decoration: none; display: flex; align-items: center">주간</a>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="이전 달" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #EFE4D6; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+        <span style="font-family: 'Jua', sans-serif; font-size: 22px">2026년 10월</span>
+        <span style="font-size: 12px; color: #5C4A3A; display: flex; align-items: center; gap: 4px"><img src="../icons/rice.svg" alt="" style="width: 16px; height: 16px">베이스 쌀 공통 · 재료만 표시</span>
+      </div>
+      <button aria-label="다음 달" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #EFE4D6; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; overflow-y: auto; padding: 0 12px 110px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 22px; padding: 10px 6px 10px">
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; padding-bottom: 6px">
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #B91C1C">일</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #6B5A4A">월</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #6B5A4A">화</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #6B5A4A">수</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #6B5A4A">목</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #6B5A4A">금</span>
+        <span style="text-align: center; font-size: 12px; font-weight: 600; color: #1D4ED8">토</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px">
+        <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
+          <sc-if value="{{c.blank}}" hint-placeholder-val="{{ false }}">
+            <span style="height: 88px" aria-hidden="true"></span>
+          </sc-if>
+          <sc-if value="{{c.real}}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{c.pick}}" aria-label="{{c.aria}}" aria-pressed="{{c.selected}}" style="height: 88px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{c.ring}}; background: {{c.bg}}; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; padding: 5px 0 0">
+              <span style="display: flex; align-items: center; gap: 3px; height: 16px">
+                <span style="font-size: 13px; font-weight: {{c.weight}}; color: {{c.ink}}">{{c.day}}</span>
+                <span style="width: 5px; height: 5px; border-radius: 3px; background: {{c.dot}}" aria-hidden="true"></span>
+              </span>
+              <span style="display: flex; flex-direction: column; align-items: center; gap: 2px" aria-hidden="true">
+                <sc-for list="{{c.icons}}" as="ic" hint-placeholder-count="3">
+                  <img src="{{ic.src}}" alt="" style="width: 18px; height: 18px; display: block">
+                </sc-for>
+              </span>
+            </button>
+          </sc-if>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; padding: 0 8px; font-size: 12px; color: #5C4A3A">
+      <span style="display: flex; align-items: center; gap: 5px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #15803D"></span>완료</span>
+      <span style="display: flex; align-items: center; gap: 5px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #D6C7B4"></span>예정</span>
+      <span style="display: flex; align-items: center; gap: 5px"><span style="width: 12px; height: 12px; border-radius: 4px; border: 2px solid #7E22CE; box-sizing: border-box"></span>알레르기 테스트일</span>
+    </div>
+
+    <article style="background: #FFFFFF; border: 1.5px solid #EFE4D6; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 12px; font-weight: 600; color: #6B5A4A">D+{{sel.dplus}}</span>
+          <span style="font-size: 17px; font-weight: 700">10월 {{sel.day}}일 재료</span>
+        </div>
+        <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: {{sel.tagBg}}; color: {{sel.tagInk}}">{{sel.status}}</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <sc-for list="{{sel.items}}" as="it" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 12px; background: #FFFBF5; border: 1px solid #EFE4D6">
+            <img src="{{it.src}}" alt="" style="width: 28px; height: 28px">
+            <span style="flex: 1; font-size: 14px; font-weight: 600">{{it.name}}</span>
+            <span style="font-size: 12px; color: #5C4A3A">{{it.cat}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{sel.allergen}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #6B21A8; background: #F3E8FF; padding: 8px 10px; border-radius: 10px">
+          <img src="{{sel.allergenIcon}}" alt="" style="width: 22px; height: 22px">알레르기 테스트 · {{sel.allergen}}</div>
+      </sc-if>
+      <button style="height: 44px; border-radius: 14px; border: none; background: #92400E; color: #FFFFFF; font-size: 14px; font-weight: 700">이 날 식단 수정</button>
+    </article>
+  </div>
+
+  <nav aria-label="하단 메뉴" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; box-sizing: border-box; padding: 8px 12px 20px; background: #FFFFFF; border-top: 1px solid #EFE4D6; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>홈</a>
+    <a href="Calendar.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #92400E; font-size: 11px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>식단</a>
+    <a href="Cube.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>홈큐브</a>
+    <a href="Report.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>성장 리포트</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 27 };
+  }
+  renderVals() {
+    const I = {
+      '쌀': ['../icons/rice.svg', '베이스'],
+      '소고기': ['../icons/beef.svg', '고기'],
+      '닭고기': ['../icons/chicken.svg', '고기'],
+      '대구살': ['../icons/cod.svg', '생선'],
+      '애호박': ['../icons/zucchini.svg', '채소'],
+      '양파': ['../icons/onion.svg', '채소'],
+      '브로콜리': ['../icons/broccoli.svg', '채소'],
+      '단호박': ['../icons/pumpkin.svg', '채소'],
+      '시금치': ['../icons/spinach.svg', '채소'],
+      '감자': ['../icons/potato.svg', '채소'],
+      '무': ['../icons/radish.svg', '채소'],
+      '당근': ['../icons/carrot.svg', '채소'],
+      '청경채': ['../icons/bokchoy.svg', '채소'],
+      '고구마': ['../icons/sweetpotato.svg', '채소'],
+      '배': ['../icons/pear.svg', '과일'],
+      '사과': ['../icons/apple.svg', '과일'],
+      '바나나': ['../icons/banana.svg', '과일']
+    };
+    const AL = { '계란노른자': '../icons/yolk.svg', '밀가루': '../icons/wheat.svg' };
+    const TODAY = 27;
+    const menus = [
+      ['소고기', '애호박', '양파'],
+      ['소고기', '브로콜리', '배'],
+      ['닭고기', '단호박', '사과'],
+      ['소고기', '시금치', '감자'],
+      ['소고기', '무', '당근'],
+      ['대구살', '청경채'],
+      ['소고기', '고구마', '바나나']
+    ];
+    const allergenName = (d) => (d >= 5 && d <= 7) ? '밀가루' : (d >= 26 && d <= 28) ? '계란노른자' : '';
+    const allergenDay = (d) => (d >= 5 && d <= 7) ? d - 4 : d - 25;
+    const cells = [];
+    for (let b = 0; b < 4; b++) cells.push({ blank: true, real: false });
+    for (let d = 1; d <= 31; d++) {
+      const selected = this.state.sel === d;
+      const isToday = d === TODAY;
+      const dow = (d + 3) % 7;
+      const m = menus[(d - 1) % menus.length];
+      const al = allergenName(d);
+      cells.push({
+        blank: false, real: true, day: d, selected,
+        icons: m.map((n) => ({ src: I[n][0] })),
+        aria: '10월 ' + d + '일, ' + m.join(', ') + (al ? ', ' + al + ' 테스트' : '') + (d < TODAY ? ', 완료' : ', 예정'),
+        bg: selected ? '#FEF3C7' : isToday ? '#FFFBEB' : al ? '#FAF5FF' : 'transparent',
+        ring: selected ? '#92400E' : isToday ? '#F59E0B' : al ? '#C084FC' : 'transparent',
+        ink: dow === 0 ? '#B91C1C' : dow === 6 ? '#1D4ED8' : '#2B2118',
+        weight: selected || isToday ? 700 : 500,
+        dot: d < TODAY ? '#15803D' : '#D6C7B4',
+        pick: () => this.setState({ sel: d })
+      });
+    }
+    const s = this.state.sel;
+    const m = ['쌀'].concat(menus[(s - 1) % menus.length]);
+    const st = s < TODAY ? 'done' : s === TODAY ? 'today' : 'plan';
+    const al = allergenName(s);
+    const sel = {
+      day: s, dplus: 197 + s,
+      items: m.map((n) => ({ name: n, src: I[n][0], cat: I[n][1] })),
+      allergen: al ? al + ' ' + allergenDay(s) + '일차' : '',
+      allergenIcon: al ? AL[al] : '',
+      status: st === 'done' ? '완료' : st === 'today' ? '오늘' : '예정',
+      tagBg: st === 'done' ? '#15803D' : st === 'today' ? '#92400E' : '#F3EBE0',
+      tagInk: st === 'plan' ? '#5C4A3A' : '#FFFFFF'
+    };
+    return { cells, sel };
+  }
+}
+</script>
+</body>
+</html>

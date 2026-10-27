@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주간 식단 플래너</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+  <header style="padding: 20px 20px 12px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 26px; font-weight: 400">식단 플래너</h1>
+      <div role="group" aria-label="보기 전환" style="display: flex; background: #F3EBE0; border-radius: 22px; padding: 4px">
+        <a href="Calendar.dc.html" style="height: 36px; padding: 0 14px; border-radius: 18px; background: transparent; font-size: 13px; font-weight: 600; color: #6B5A4A; text-decoration: none; display: flex; align-items: center">월간</a>
+        <button aria-pressed="true" style="height: 36px; padding: 0 14px; border: none; border-radius: 18px; background: #FFFFFF; font-size: 13px; font-weight: 700; color: #92400E; box-shadow: 0 1px 2px rgba(43,33,24,0.12)">주간</button>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="이전 주" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #EFE4D6; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+        <span style="font-size: 16px; font-weight: 700">10월 26일 – 11월 1일</span>
+        <span style="font-size: 12px; color: #6B5A4A">D+223 ~ D+229 · 중기</span>
+      </div>
+      <button aria-label="다음 주" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #EFE4D6; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; overflow-y: auto; padding: 0 20px 170px; display: flex; flex-direction: column; gap: 10px">
+    <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+      <article style="background: {{d.bg}}; border: 1.5px solid {{d.border}}; border-radius: 18px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start">
+        <div style="width: 44px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 2px">
+          <span style="font-size: 12px; font-weight: 600; color: {{d.dowInk}}">{{d.dow}}</span>
+          <span style="font-family: 'Jua', sans-serif; font-size: 22px; line-height: 1.1">{{d.date}}</span>
+        </div>
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700">{{d.title}}</span>
+            <span style="font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: {{d.tagBg}}; color: {{d.tagInk}}; flex-shrink: 0">{{d.status}}</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px">
+            <sc-for list="{{d.items}}" as="it" hint-placeholder-count="4">
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; padding: 3px 9px 3px 4px; border-radius: 10px; background: #FFFFFF; border: 1px solid #EFE4D6"><img src="{{it.src}}" alt="" style="width: 20px; height: 20px">{{it.name}}</span>
+            </sc-for>
+            <sc-if value="{{d.allergen}}" hint-placeholder-val="{{ false }}">
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 3px 9px 3px 4px; border-radius: 10px; background: #F3E8FF; color: #6B21A8"><img src="../icons/yolk.svg" alt="" style="width: 20px; height: 20px">{{d.allergen}}</span>
+            </sc-if>
+          </div>
+        </div>
+      </article>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 12px; right: 12px; bottom: 96px; background: #2B2118; border-radius: 22px; padding: 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; box-shadow: 0 8px 24px rgba(43,33,24,0.25)">
+    <button style="height: 48px; border: none; border-radius: 16px; background: #F59E0B; color: #2B2118; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"></path></svg>AI 채우기</button>
+    <button style="height: 48px; border: none; border-radius: 16px; background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>재료 대체</button>
+    <button style="height: 48px; border: none; border-radius: 16px; background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-3"></path></svg>실행취소</button>
+  </div>
+
+  <nav aria-label="하단 메뉴" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; box-sizing: border-box; padding: 8px 12px 20px; background: #FFFFFF; border-top: 1px solid #EFE4D6; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>홈</a>
+    <a href="Planner.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #92400E; font-size: 11px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>식단</a>
+    <a href="Cube.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>홈큐브</a>
+    <a href="Report.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #6B5A4A; font-size: 11px; font-weight: 500">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>성장 리포트</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      '쌀': '../icons/rice.svg',
+      '소고기': '../icons/beef.svg',
+      '닭고기': '../icons/chicken.svg',
+      '대구살': '../icons/cod.svg',
+      '애호박': '../icons/zucchini.svg',
+      '양파': '../icons/onion.svg',
+      '브로콜리': '../icons/broccoli.svg',
+      '단호박': '../icons/pumpkin.svg',
+      '시금치': '../icons/spinach.svg',
+      '감자': '../icons/potato.svg',
+      '무': '../icons/radish.svg',
+      '당근': '../icons/carrot.svg',
+      '청경채': '../icons/bokchoy.svg',
+      '고구마': '../icons/sweetpotato.svg',
+      '배': '../icons/pear.svg',
+      '사과': '../icons/apple.svg',
+      '바나나': '../icons/banana.svg'
+    };
+    const raw = [
+      { dow: '월', date: '26', items: ['소고기', '애호박', '양파'], allergen: '노른자 1일', s: 'done' },
+      { dow: '화', date: '27', items: ['소고기', '브로콜리', '배'], allergen: '노른자 2일', s: 'today' },
+      { dow: '수', date: '28', items: ['닭고기', '단호박', '사과'], allergen: '노른자 3일', s: 'plan' },
+      { dow: '목', date: '29', items: ['소고기', '시금치', '감자'], allergen: '', s: 'plan' },
+      { dow: '금', date: '30', items: ['소고기', '무', '당근'], allergen: '', s: 'plan' },
+      { dow: '토', date: '31', items: ['대구살', '청경채'], allergen: '', s: 'plan' },
+      { dow: '일', date: '1', items: ['소고기', '고구마', '바나나'], allergen: '', s: 'plan' }
+    ];
+    const days = raw.map((d) => ({
+      ...d,
+      title: d.items.join(' · '),
+      items: ['쌀'].concat(d.items).map((n) => ({ name: n, src: I[n] })),
+      status: d.s === 'done' ? '완료' : d.s === 'today' ? '오늘' : '예정',
+      bg: d.s === 'done' ? '#F0FDF4' : d.s === 'today' ? '#FEF3C7' : '#FFFFFF',
+      border: d.s === 'done' ? '#86EFAC' : d.s === 'today' ? '#F59E0B' : '#EFE4D6',
+      tagBg: d.s === 'done' ? '#15803D' : d.s === 'today' ? '#92400E' : '#F3EBE0',
+      tagInk: d.s === 'plan' ? '#5C4A3A' : '#FFFFFF',
+      dowInk: d.dow === '일' ? '#B91C1C' : d.dow === '토' ? '#1D4ED8' : '#6B5A4A'
+    }));
+    return { days };
+  }
+}
+</script>
+</body>
+</html>

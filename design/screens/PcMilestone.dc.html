@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>맘마 PC 마일스톤</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1000px; box-sizing: border-box; background: #FFFBF5; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <aside style="flex: 1 1 240px; max-width: 100%; box-sizing: border-box; padding: 28px 20px; background: #FFFFFF; border-right: 1px solid #EFE4D6; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 40px; height: 40px; border-radius: 14px; background: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0z"></path><path d="M12 2v5"></path><path d="M8 4l1.5 3"></path><path d="M16 4l-1.5 3"></path></svg>
+      </div>
+      <span style="font-family: 'Jua', sans-serif; font-size: 26px">맘마</span>
+    </div>
+    <nav aria-label="주 메뉴" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="Desktop.dc.html" style="height: 44px; padding: 0 14px; border-radius: 12px; color: #5C4A3A; font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>식단 플래너</a>
+      <a href="PcCube.dc.html" style="height: 44px; padding: 0 14px; border-radius: 12px; color: #5C4A3A; font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>홈큐브 보관함</a>
+      <a href="PcReport.dc.html" style="height: 44px; padding: 0 14px; border-radius: 12px; color: #5C4A3A; font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>성장 리포트</a>
+      <a href="PcMilestone.dc.html" aria-current="page" style="height: 44px; padding: 0 14px; border-radius: 12px; background: {{t.soft}}; color: {{t.ink}}; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"></path><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>마일스톤</a>
+    </nav>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 12px; font-weight: 600; color: #6B5A4A">테마</span>
+      <div role="group" aria-label="테마 선택" style="display: flex; flex-direction: column; gap: 6px">
+        <sc-for list="{{themeOpts}}" as="o" hint-placeholder-count="3">
+          <button onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="height: 44px; padding: 0 12px; border-radius: 12px; border: 1.5px solid {{o.border}}; background: #FFFFFF; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #2B2118; text-align: left">
+            <span style="width: 18px; height: 18px; border-radius: 9px; background: {{o.accent}}" aria-hidden="true"></span>{{o.name}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="margin-top: auto; background: {{t.soft}}; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 15px; font-weight: 700">하은이</span>
+      <span style="font-size: 12px; color: #5C4A3A">D+224 · 중기 이유식</span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px">
+    <div style="max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 20px">
+
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <span style="font-size: 14px; color: #5C4A3A">월령별 이유식 적응 체크리스트</span>
+          <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 36px; font-weight: 400">마일스톤</h1>
+        </div>
+        <a href="PcPrint.dc.html" style="height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid #EFE4D6; background: #FFFFFF; color: #2B2118; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>체크리스트 출력</a>
+      </div>
+
+      <div role="tablist" aria-label="이유식 단계" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+        <sc-for list="{{stages}}" as="s" hint-placeholder-count="3">
+          <button role="tab" aria-selected="{{s.on}}" onClick="{{s.pick}}" style="text-align: left; border-radius: 20px; border: 2px solid {{s.border}}; background: {{s.bg}}; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+            <span style="display: flex; align-items: center; justify-content: space-between; width: 100%">
+              <span style="font-size: 17px; font-weight: 700; color: #2B2118">{{s.name}}</span>
+              <span style="font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: {{s.tagBg}}; color: {{s.tagInk}}">{{s.tag}}</span>
+            </span>
+            <span style="font-size: 13px; color: #5C4A3A">{{s.range}} · {{s.texture}}</span>
+            <span style="display: block; width: 100%; height: 8px; border-radius: 4px; background: #F3EBE0; overflow: hidden"><span style="display: block; width: {{s.pct}}; height: 100%; background: {{s.bar}}"></span></span>
+            <span style="font-size: 12px; font-weight: 600; color: #5C4A3A">{{s.done}} / {{s.total}} 완료</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section style="flex: 3 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 8px">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700">{{cur.name}} 체크리스트</h2>
+            <span style="font-size: 14px; font-weight: 700; color: {{t.ink}}">{{cur.done}} / {{cur.total}}</span>
+          </div>
+          <sc-for list="{{items}}" as="m" hint-placeholder-count="5">
+            <label style="min-height: 64px; display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 14px; background: {{m.bg}}; cursor: pointer">
+              <input type="checkbox" checked="{{m.checked}}" onChange="{{m.toggle}}" style="width: 24px; height: 24px; margin: 0; accent-color: #15803D; flex-shrink: 0">
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 15px; font-weight: 600; color: {{m.ink}}; text-decoration: {{m.deco}}">{{m.text}}</span>
+                <span style="font-size: 12px; color: #5C4A3A">{{m.hint}}</span>
+              </span>
+              <span style="font-size: 12px; font-weight: 600; color: {{m.dateInk}}">{{m.date}}</span>
+            </label>
+          </sc-for>
+        </section>
+
+        <div style="flex: 2 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+          <section style="background: {{t.soft}}; border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 17px; font-weight: 700">{{cur.name}} 가이드</h2>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(43,33,24,0.12)"><span>월령</span><span style="font-weight: 700">{{cur.range}}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(43,33,24,0.12)"><span>식감</span><span style="font-weight: 700">{{cur.texture}}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(43,33,24,0.12)"><span>하루 횟수</span><span style="font-weight: 700">[가이드 기준 입력]</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0"><span>1회 권장량</span><span style="font-weight: 700">[가이드 기준 입력]</span></div>
+          </section>
+          <section style="background: #FFFFFF; border: 1px solid #EFE4D6; border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+            <h2 style="margin: 0; font-size: 17px; font-weight: 700">최근 기록</h2>
+            <div style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #15803D; margin-top: 6px; flex-shrink: 0"></span><span style="flex: 1">하루 2회 이유식이 자리 잡았다</span><span style="font-size: 12px; color: #5C4A3A">10.18</span></div>
+            <div style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #15803D; margin-top: 6px; flex-shrink: 0"></span><span style="flex: 1">숟가락을 보면 스스로 입을 벌린다</span><span style="font-size: 12px; color: #5C4A3A">10.09</span></div>
+            <div style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #15803D; margin-top: 6px; flex-shrink: 0"></span><span style="flex: 1">두부처럼 부드러운 덩어리를 혀로 으깬다</span><span style="font-size: 12px; color: #5C4A3A">10.02</span></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      theme: 'Warm Amber',
+      stage: 1,
+      checked: { '0-0': true, '0-1': true, '0-2': true, '0-3': true, '0-4': true, '1-0': true, '1-1': true, '1-3': true }
+    };
+  }
+  renderVals() {
+    const themes = {
+      'Warm Amber': { accent: '#F59E0B', soft: '#FEF3C7', ink: '#92400E' },
+      'Soft Blue': { accent: '#3B82F6', soft: '#DBEAFE', ink: '#1E40AF' },
+      'Nature Green': { accent: '#10B981', soft: '#D1FAE5', ink: '#065F46' }
+    };
+    const t = themes[this.state.theme];
+    const themeOpts = Object.keys(themes).map((name) => ({
+      name, accent: themes[name].accent, on: this.state.theme === name,
+      border: this.state.theme === name ? themes[name].ink : '#EFE4D6',
+      pick: () => this.setState({ theme: name })
+    }));
+    const data = [
+      { name: '초기', range: '4~6개월', texture: '미음', items: [
+        ['숟가락에 익숙해진다', '숟가락이 입에 닿아도 밀어내지 않아요', '8.14'],
+        ['미음을 삼킬 수 있다', '혀로 밀어내지 않고 넘겨요', '8.20'],
+        ['쌀 알레르기 테스트 완료', '3일 연속 이상 반응 없음', '8.22'],
+        ['하루 1회 이유식', '같은 시간대에 꾸준히', '8.30'],
+        ['도움받아 앉은 자세 유지', '이유식 의자에서 고개를 가눠요', '9.05']
+      ] },
+      { name: '중기', range: '7~9개월', texture: '죽', items: [
+        ['두부처럼 부드러운 덩어리를 혀로 으깬다', '입자를 조금씩 키워 보세요', '10.02'],
+        ['숟가락을 보면 스스로 입을 벌린다', '먹을 준비가 되었다는 신호', '10.09'],
+        ['컵으로 물 마시기를 연습한다', '빨대컵이나 작은 컵으로 시작', ''],
+        ['하루 2회 이유식이 자리 잡았다', '아침·저녁 시간을 일정하게', '10.18'],
+        ['손으로 음식을 집으려 한다', '부드러운 핑거푸드를 쥐여 주세요', '']
+      ] },
+      { name: '후기·완료기', range: '10~12개월', texture: '진밥', items: [
+        ['진밥을 잇몸으로 씹는다', '밥알 형태가 남은 식감', ''],
+        ['하루 3회 식사', '가족 식사 시간에 맞춰요', ''],
+        ['핑거푸드를 스스로 먹는다', '집기 쉬운 크기로 잘라 주세요', ''],
+        ['컵을 두 손으로 잡고 마신다', '흘려도 괜찮아요', ''],
+        ['가족과 함께 식탁에 앉는다', '같은 메뉴를 순하게 조리', '']
+      ] }
+    ];
+    const ck = this.state.checked;
+    const stages = data.map((s, si) => {
+      const done = s.items.filter((_, i) => ck[si + '-' + i]).length;
+      const on = this.state.stage === si;
+      const complete = done === s.items.length;
+      return {
+        name: s.name, range: s.range, texture: s.texture, done, total: s.items.length, on,
+        pct: Math.round(done / s.items.length * 100) + '%',
+        tag: complete ? '완료' : si === 1 ? '진행 중' : done ? '진행 중' : '예정',
+        tagBg: complete ? '#15803D' : si === 1 ? t.ink : '#F3EBE0',
+        tagInk: complete || si === 1 ? '#FFFFFF' : '#5C4A3A',
+        bar: complete ? '#15803D' : t.accent,
+        bg: on ? '#FFFFFF' : '#FFFBF5',
+        border: on ? t.ink : '#EFE4D6',
+        pick: () => this.setState({ stage: si })
+      };
+    });
+    const si = this.state.stage;
+    const items = data[si].items.map((it, i) => {
+      const key = si + '-' + i;
+      const checked = !!ck[key];
+      return {
+        text: it[0], hint: it[1], checked,
+        date: checked ? (it[2] || '오늘') + ' 체크' : '',
+        dateInk: '#15803D',
+        bg: checked ? '#F0FDF4' : '#FFFBF5',
+        ink: checked ? '#5C4A3A' : '#2B2118',
+        deco: checked ? 'line-through' : 'none',
+        toggle: () => this.setState({ checked: { ...this.state.checked, [key]: !checked } })
+      };
+    });
+    return { t, themeOpts, stages, items, cur: stages[si] };
+  }
+}
+</script>
+</body>
+</html>
