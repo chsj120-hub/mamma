@@ -3,7 +3,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAppData } from '../lib/data'
 import { dotted } from '../lib/date'
 import { STAGES } from '../lib/stage'
-import { THEMES, useTheme, type ThemeId } from '../lib/theme'
+import { PROVIDER_NAME } from '../auth'
+import { useAuth } from '../auth/AuthProvider'
 import { Logo } from './AppHeader'
 import { ProfileModal } from './home/ProfileModal'
 
@@ -63,8 +64,8 @@ export function DesktopLayout() {
 
 function Sidebar() {
   const { profile, setProfile } = useAppData()
-  const { theme, setTheme } = useTheme()
   const [editing, setEditing] = useState(false)
+  const { user, signOutNow } = useAuth()
 
   return (
     <aside className="print:hidden sticky top-0 flex h-dvh w-60 shrink-0 flex-col gap-7 overflow-y-auto border-r border-line bg-card px-5 py-7">
@@ -86,29 +87,6 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="flex flex-col gap-2.5">
-        <span className="text-xs font-semibold text-muted" id="theme-label">
-          테마
-        </span>
-        <div role="radiogroup" aria-labelledby="theme-label" className="flex flex-col gap-1.5">
-          {(Object.keys(THEMES) as ThemeId[]).map((id) => {
-            const on = theme === id
-            return (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => setTheme(id)}
-                className={`flex h-11 items-center gap-2.5 rounded-xl border-[1.5px] bg-card px-3 text-left text-[13px] font-semibold ${on ? 'border-text' : 'border-line'}`}
-              >
-                <span className="size-[18px] rounded-full" style={{ background: THEMES[id].accent }} aria-hidden="true" />
-                {THEMES[id].name}
-              </button>
-            )
-          })}
-        </div>
-      </div>
 
       <div className="mt-auto flex flex-col gap-1.5 rounded-[18px] bg-soft p-4">
         <span className="text-[15px] font-bold">{profile.name}</span>
@@ -118,9 +96,15 @@ function Sidebar() {
         <span className="text-xs text-sub">
           1회 {profile.targetMl}ml · 하루 {profile.mealsPerDay}회
         </span>
-        <button type="button" onClick={() => setEditing(true)} className="mt-1.5 h-10 rounded-xl border-none bg-card text-[13px] font-semibold text-ink">
+        <button type="button" onClick={() => setEditing(true)} className="mt-1.5 h-11 rounded-xl border-none bg-card text-[13px] font-semibold text-ink">
           프로필 수정
         </button>
+        <div className="mt-1 flex items-center justify-between gap-2 border-t border-text/10 pt-2.5">
+          <span className="min-w-0 truncate text-xs text-sub">{user ? `${PROVIDER_NAME[user.provider]} 계정` : ''}</span>
+          <button type="button" onClick={signOutNow} className="h-11 shrink-0 rounded-xl border-none bg-transparent px-2 text-[13px] font-semibold text-sub underline">
+            로그아웃
+          </button>
+        </div>
       </div>
 
       <ProfileModal

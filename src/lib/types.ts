@@ -10,9 +10,24 @@ export type BabyProfile = {
   /** 1회 목표 섭취량(ml) */
   targetMl: number
   mealsPerDay: number
+  /** 끼니별 먹는 시간 (HH:mm). 하루 식사 횟수와 같은 개수. 없으면 기본 시간 */
+  mealTimes?: string[]
 }
 
 export type MealStatus = 'planned' | 'done'
+
+/** 끼니 반응 한 줄: 잘 먹음 / 조금 먹음 / 거부 */
+export type Taste = 'good' | 'some' | 'refuse'
+
+/** 키·몸무게·머리둘레 기록 (측정한 날 하나). 값은 잰 것만 있어도 된다 */
+export type GrowthRecord = {
+  id: string
+  /** YYYY-MM-DD */
+  date: string
+  heightCm?: number
+  weightKg?: number
+  headCm?: number
+}
 
 export type Meal = {
   id: string
@@ -30,6 +45,8 @@ export type Meal = {
   status: MealStatus
   /** 실제로 먹은 양(ml) */
   eatenMl?: number
+  /** 먹은 반응 한 줄 */
+  taste?: Taste
 }
 
 export type MealPlanDay = {

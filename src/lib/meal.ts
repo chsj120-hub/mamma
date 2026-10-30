@@ -28,6 +28,23 @@ export function mealTemplate(mealsPerDay: number): { time: string; label: string
   return [{ time: '08:30', label: '아침' }, { time: '12:30', label: '점심' }, { time: '17:30', label: '저녁' }]
 }
 
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/
+export const isValidTime = (t: unknown): t is string => typeof t === 'string' && TIME_RE.test(t)
+
+/** 설정한 시간으로 정해진 끼니 목록 (식단 새로 만들기·AI 채우기·CSV 기본값이 모두 이걸 쓴다) */
+export function mealSlots(p: { mealsPerDay: number; mealTimes?: string[] }): { time: string; label: string }[] {
+  return mealTemplate(p.mealsPerDay).map((s, i) => ({ label: s.label, time: isValidTime(p.mealTimes?.[i]) ? p.mealTimes![i] : s.time }))
+}
+
+/** 식사 횟수를 바꿀 때 같은 이름의 끼니(아침·점심·저녁)는 이미 정한 시간을 이어받는다 */
+export function remapMealTimes(p: { mealsPerDay: number; mealTimes?: string[] }, nextCount: number): string[] {
+  const old = mealSlots(p)
+  return mealTemplate(nextCount).map((s) => old.find((o) => o.label === s.label)?.time ?? s.time)
+}
+
+/** 시간이 앞 끼니보다 뒤여야 한다 */
+export const timesAscending = (times: string[]) => times.every((t, i) => i === 0 || t > times[i - 1])
+
 export const newId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`)
 
 /** 식사에 들어간 재료 (베이스 → 고기 → 채소 → 과일 → 간식 순, 알레르기 테스트 재료 제외) */

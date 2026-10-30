@@ -10,6 +10,10 @@
 |---|---|
 | `MASTER_PLAN.md` | 기획서 원본 (기능 명세, 테마 정의) |
 | `PROMPTS.md` | Claude Code에 붙여 넣을 단계별 요청문 (모바일 + PC) |
+| `ICONS.md` | 재료 아이콘 파일명 ↔ 한글 이름표 (34종) |
+| **로그인** | |
+| `screens/AppLogin.dc.html` | 00 앱 로그인·가입 (모바일, 카카오·네이버·Google) |
+| `screens/PcLogin.dc.html` | 00 PC 로그인 (가입은 앱에서만, 미가입 계정 안내) |
 | **모바일 (390×844)** | |
 | `screens/Main.dc.html` | 01 홈 · 오늘의 식단 |
 | `screens/Planner.dc.html` | 02 주간 식단 플래너 |
@@ -23,7 +27,7 @@
 | `screens/PcReport.dc.html` | 09 PC 성장 리포트 (주간/월간, 막대그래프, 알레르기 기록) |
 | `screens/PcMilestone.dc.html` | 10 PC 마일스톤 (단계 탭, 체크리스트, 가이드) |
 | `screens/PcPrint.dc.html` | 11 PC 출력 모달 (출력 종류·옵션, A4 미리보기) |
-| `icons/*.svg` | 식재료 미니 아이콘 19종 (24×24) |
+| `icons/*.svg` | 식재료·알레르기 미니 아이콘 34종 (24×24) |
 
 `.dc.html` 파일은 디자인 툴 전용 형식입니다. 브라우저에서 바로 열리지는 않지만,
 마크업의 inline style(색상·간격·크기)과 `<script>` 안의 샘플 데이터·상태 로직을 그대로 참고하면 됩니다.

@@ -1,16 +1,22 @@
-import { useState } from 'react'
-import { md } from '../../lib/date'
+import { useMemo, useState } from 'react'
+import { expiringCubes } from '../../lib/cube'
+import { useAppData } from '../../lib/data'
+import { useIsDesktop } from '../../lib/device'
+import { md, todayKey } from '../../lib/date'
 import { ingredientName, type IngredientId } from '../../lib/ingredients'
-import { mealTemplate, newId, SLOTS, slotOptions, sortMeals, type SlotKey } from '../../lib/meal'
+import { newId, SLOTS, slotOptions, sortMeals, type SlotKey } from '../../lib/meal'
 import type { Meal } from '../../lib/types'
 import { inputCls } from '../home/ProfileModal'
 import { IngredientIcon } from '../IngredientIcon'
+import { suggestDayMenus, type DayMenuSuggestion } from '../../lib/recommender'
 import { Sheet } from '../Sheet'
+import { DayMenuSuggestions } from './DayMenuSuggestions'
 
 type Props = {
   date: string
   meals: Meal[]
-  mealsPerDay: number
+  /** 설정한 끼니·시간 (비어 있는 날을 새로 만들 때 기본값) */
+  slots: { time: string; label: string }[]
   /** 1회 목표량 (먹은 양 입력칸 안내용) */
   targetMl: number
   onSave: (meals: Meal[]) => void
@@ -20,14 +26,37 @@ type Props = {
 const LABELS = ['아침', '점심', '저녁', '간식']
 
 /** 하루 식단 편집 시트. 끼니별로 칸(베이스·고기·채소…)을 눌러 재료를 고른다 */
-export function DayEditorSheet({ date, meals, mealsPerDay, targetMl, onSave, onClose }: Props) {
+export function DayEditorSheet({ date, meals, slots, targetMl, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<Meal[]>(() =>
     meals.length
       ? sortMeals(meals)
-      : mealTemplate(mealsPerDay).map((t) => ({ id: newId(), ...t, base: 'rice' as IngredientId, status: 'planned' as const })),
+      : slots.map((t) => ({ id: newId(), ...t, base: 'rice' as IngredientId, status: 'planned' as const })),
   )
   const [open, setOpen] = useState<{ mealId: string; slot: SlotKey } | null>(null)
   const { month, day } = md(date)
+  const desktop = useIsDesktop()
+  const { plans, profile, reactions, cubes } = useAppData()
+
+  // 그날 메뉴 AI 추천 3가지 (전날까지의 기록·소비기한 임박 큐브를 반영)
+  const suggestions = useMemo(
+    () =>
+      suggestDayMenus(
+        plans,
+        date,
+        profile,
+        reactions,
+        expiringCubes(cubes, todayKey()).map((c) => c.ingredient),
+      ),
+    [plans, date, profile, reactions, cubes],
+  )
+  const doneMeals = meals.filter((m) => m.status === 'done')
+
+  /** 추천을 바로 적용한다. 이미 먹은 끼니는 그대로 두고 나머지를 추천으로 바꾼다 */
+  const applySuggestion = (s: DayMenuSuggestion) => {
+    const doneLabels = new Set(doneMeals.map((m) => m.label))
+    onSave(sortMeals([...doneMeals, ...s.meals.filter((m) => !doneLabels.has(m.label))]))
+  }
+  const panel = <DayMenuSuggestions suggestions={suggestions} onApply={applySuggestion} keepsDone={doneMeals.length > 0} />
 
   const patch = (id: string, p: Partial<Meal>) => setDraft((d) => d.map((m) => (m.id === id ? { ...m, ...p } : m)))
 
@@ -40,6 +69,7 @@ export function DayEditorSheet({ date, meals, mealsPerDay, targetMl, onSave, onC
   return (
     <Sheet
       open
+      wide={desktop}
       title={`${month}월 ${day}일 식단`}
       onClose={onClose}
       footer={
@@ -55,6 +85,9 @@ export function DayEditorSheet({ date, meals, mealsPerDay, targetMl, onSave, onC
         </div>
       }
     >
+      {!desktop && panel}
+      <div className={desktop ? 'grid grid-cols-[minmax(0,1fr)_300px] items-start gap-5' : 'contents'}>
+      <div className="flex flex-col gap-5">
       {draft.map((meal) => (
         <section key={meal.id} className="flex flex-col gap-3 rounded-[20px] border-[1.5px] border-line bg-card p-4" aria-label={`${meal.label} 식사`}>
           <div className="flex items-center gap-2">
@@ -149,6 +182,9 @@ export function DayEditorSheet({ date, meals, mealsPerDay, targetMl, onSave, onC
       <button type="button" onClick={addMeal} className="h-11 rounded-[22px] border-[1.5px] border-dashed border-line bg-transparent text-sm font-semibold text-sub">
         + 식사 추가
       </button>
+      </div>
+      {desktop && <div className="sticky top-0">{panel}</div>}
+      </div>
     </Sheet>
   )
 }

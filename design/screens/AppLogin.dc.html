@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>맘마 앱 로그인</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=Jua&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#92400E}a:hover{color:#78350F}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FEF3C7; font-family: 'IBM Plex Sans KR', sans-serif; color: #2B2118; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 24px 24px">
+    <div style="position: relative; width: 236px; height: 236px">
+      <div style="position: absolute; left: 38px; top: 38px; width: 160px; height: 160px; border-radius: 80px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(146,64,14,0.12)">
+        <div style="width: 92px; height: 92px; border-radius: 30px; background: #F59E0B; display: flex; align-items: center; justify-content: center">
+          <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0z"></path><path d="M12 2v5"></path><path d="M8 4l1.5 3"></path><path d="M16 4l-1.5 3"></path></svg>
+        </div>
+      </div>
+      <img src="../icons/beef.svg" alt="" style="position: absolute; left: 8px; top: 30px; width: 44px; height: 44px">
+      <img src="../icons/broccoli.svg" alt="" style="position: absolute; right: 6px; top: 22px; width: 44px; height: 44px">
+      <img src="../icons/pumpkin.svg" alt="" style="position: absolute; left: 0; bottom: 46px; width: 44px; height: 44px">
+      <img src="../icons/apple.svg" alt="" style="position: absolute; right: 2px; bottom: 50px; width: 44px; height: 44px">
+      <img src="../icons/carrot.svg" alt="" style="position: absolute; left: 96px; top: -6px; width: 40px; height: 40px">
+      <img src="../icons/banana.svg" alt="" style="position: absolute; left: 98px; bottom: -4px; width: 40px; height: 40px">
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+      <h1 style="margin: 0; font-family: 'Jua', sans-serif; font-size: 52px; font-weight: 400; line-height: 1; color: #2B2118">맘마</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #5C4A3A">우리 아기 이유식,<br>월령에 맞춰 쉽게 계획해요</p>
+    </div>
+  </div>
+
+  <section style="background: #FFFFFF; border-radius: 32px 32px 0 0; padding: 28px 24px 34px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -8px 24px rgba(146,64,14,0.08)">
+    <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 700; text-align: center">간편하게 시작하기</h2>
+
+    <div style="position: relative">
+      <span style="position: absolute; right: 14px; top: -10px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: #2B2118; color: #FFFFFF; z-index: 1">최근 사용</span>
+      <a href="Main.dc.html" style="height: 54px; box-sizing: border-box; border-radius: 14px; background: #FEE500; color: rgba(0,0,0,0.85); font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; padding: 0 18px; gap: 12px">
+        <span style="width: 24px; height: 24px; border-radius: 6px; border: 1.5px dashed rgba(0,0,0,0.45); box-sizing: border-box" aria-hidden="true"></span>
+        <span style="flex: 1; text-align: center; margin-right: 36px">카카오로 시작하기</span>
+      </a>
+    </div>
+    <a href="Main.dc.html" style="height: 54px; box-sizing: border-box; border-radius: 14px; background: #03C75A; color: #FFFFFF; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; padding: 0 18px; gap: 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; border: 1.5px dashed rgba(255,255,255,0.8); box-sizing: border-box" aria-hidden="true"></span>
+      <span style="flex: 1; text-align: center; margin-right: 36px">네이버로 시작하기</span>
+    </a>
+    <a href="Main.dc.html" style="height: 54px; box-sizing: border-box; border-radius: 14px; background: #FFFFFF; border: 1px solid #747775; color: #1F1F1F; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; padding: 0 18px; gap: 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; border: 1.5px dashed #747775; box-sizing: border-box" aria-hidden="true"></span>
+      <span style="flex: 1; text-align: center; margin-right: 36px">Google로 시작하기</span>
+    </a>
+
+    <p style="margin: 6px 0 0; font-size: 12px; line-height: 1.6; color: #5C4A3A; text-align: center">처음이면 자동으로 가입돼요. 시작하면 <a href="#">이용약관</a>과<br><a href="#">개인정보 처리방침</a>에 동의하는 것으로 봅니다.</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; padding: 10px 12px; border-radius: 12px; background: #FFFBF5; font-size: 12px; color: #5C4A3A">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C4A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+      PC에서는 이 계정으로 로그인해 큰 화면으로 볼 수 있어요
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

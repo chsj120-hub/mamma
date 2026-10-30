@@ -1,20 +1,19 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import iconUrl from '../assets/brand/icon.webp'
+import wordmarkUrl from '../assets/brand/wordmark.webp'
 import { useIsDesktop } from '../lib/device'
 
-/** 맘마 로고 (그릇 아이콘 + 글자). PC 사이드 메뉴와 모바일 헤더가 함께 쓴다 */
+/** 맘마 로고 (앱 아이콘 + 글자 로고). PC 사이드 메뉴와 모바일 헤더가 함께 쓴다. 다른 제목을 주면 글자만 바꿔 쓴다 */
 export function Logo({ title = '맘마' }: { title?: string }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex size-10 items-center justify-center rounded-[14px] bg-accent">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B2118" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M3 11h18a9 9 0 0 1-18 0z" />
-          <path d="M12 2v5" />
-          <path d="M8 4l1.5 3" />
-          <path d="M16 4l-1.5 3" />
-        </svg>
-      </div>
-      <span className="font-display text-[26px] tracking-[-0.5px]">{title}</span>
+      <img src={iconUrl} alt="" width={40} height={40} draggable={false} className="size-10 rounded-[14px]" />
+      {title === '맘마' ? (
+        <img src={wordmarkUrl} alt="맘마" width={64} height={40} draggable={false} className="h-8 w-auto" />
+      ) : (
+        <span className="font-display text-[26px] tracking-[-0.5px]">{title}</span>
+      )}
     </div>
   )
 }

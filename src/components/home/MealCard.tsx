@@ -1,8 +1,9 @@
 import { koreanTime } from '../../lib/date'
 import { ingredientName } from '../../lib/ingredients'
 import { mealItems, mealTitle } from '../../lib/meal'
-import type { Meal } from '../../lib/types'
+import type { Meal, Taste } from '../../lib/types'
 import { IngredientIcon } from '../IngredientIcon'
+import { TastePicker } from '../TastePicker'
 
 type Props = {
   meal: Meal
@@ -12,11 +13,12 @@ type Props = {
   /** 1회 목표량. 먹은 양 기록 칸의 시작값 */
   targetMl: number
   onEatenChange: (ml: number | undefined) => void
+  onTasteChange: (taste: Taste | undefined) => void
 }
 
 const ML_STEP = 10
 
-export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange }: Props) {
+export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange, onTasteChange }: Props) {
   const done = meal.status === 'done'
   return (
     <article
@@ -91,6 +93,8 @@ export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange 
           )}
         </div>
       )}
+
+      {done && <TastePicker value={meal.taste} onChange={onTasteChange} />}
 
       {meal.allergen && (
         <div className="flex items-center gap-2 rounded-[10px] bg-allergy-bg px-2.5 py-1.5 text-[13px] font-semibold text-allergy">

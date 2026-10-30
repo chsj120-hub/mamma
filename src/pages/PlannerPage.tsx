@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react'
 import { IngredientIcon } from '../components/IngredientIcon'
 import { DayDetailCard } from '../components/planner/DayDetailCard'
+import { AiFillSheet } from '../components/planner/AiFillSheet'
 import { DayEditorSheet } from '../components/planner/DayEditorSheet'
 import { HistorySheet } from '../components/planner/HistorySheet'
 import { MonthLegend, MonthView } from '../components/planner/MonthView'
+import { ShareWeekButton } from '../components/ShareWeekButton'
 import { PlannerHeader, type PlannerView } from '../components/planner/PlannerHeader'
 import { PlannerToolbar } from '../components/planner/PlannerToolbar'
 import { ReplaceSheet } from '../components/planner/ReplaceSheet'
 import { WeekView } from '../components/planner/WeekView'
 import { useAppData } from '../lib/data'
 import { addDays, addMonths, dayCount, daysInMonth, md, monthStart, todayKey, weekStart } from '../lib/date'
+import { mealSlots } from '../lib/meal'
 import { STAGES } from '../lib/stage'
 import { useStoredState } from '../lib/storage'
 import type { Meal } from '../lib/types'
 import { usePlanActions } from '../lib/usePlanActions'
 
-type OpenSheet = { kind: 'edit'; date: string } | { kind: 'replace' } | { kind: 'history' } | null
+type OpenSheet = { kind: 'edit'; date: string } | { kind: 'aifill' } | { kind: 'replace' } | { kind: 'history' } | null
 
 export function PlannerPage() {
   const { profile, plans, commitPlans, snapshots, restoreSnapshot, toggleMealDone } = useAppData()
@@ -43,7 +46,7 @@ export function PlannerPage() {
     setCursor(monthStart(today) === next ? today : next)
   }
 
-  const fill = () => setMessage(actions.fill(visibleDates, today))
+  const fill = () => setSheet({ kind: 'aifill' })
 
   const saveDay = (date: string, meals: Meal[]) => {
     actions.saveDay(date, meals)
@@ -88,7 +91,10 @@ export function PlannerPage() {
 
       <main className={`flex flex-col gap-3 pb-20 ${view === 'week' ? 'px-5' : 'px-3'}`}>
         {view === 'week' ? (
-          <WeekView start={week} today={today} plans={plans} onOpenDay={(date) => setSheet({ kind: 'edit', date })} />
+          <>
+            <WeekView start={week} today={today} plans={plans} onOpenDay={(date) => setSheet({ kind: 'edit', date })} />
+            <ShareWeekButton weekStart={week} className="min-h-11 self-end rounded-[22px] border border-line bg-card px-4 text-[13px] font-semibold text-text" />
+          </>
         ) : (
           <>
             <MonthView month={month} today={today} selected={cursor} plans={plans} onSelect={setCursor} />
@@ -118,12 +124,13 @@ export function PlannerPage() {
           key={sheet.date}
           date={sheet.date}
           meals={plans[sheet.date]?.meals ?? []}
-          mealsPerDay={profile.mealsPerDay}
+          slots={mealSlots(profile)}
           targetMl={profile.targetMl}
           onSave={(meals) => saveDay(sheet.date, meals)}
           onClose={() => setSheet(null)}
         />
       )}
+      {sheet?.kind === 'aifill' && <AiFillSheet dates={visibleDates} today={today} onClose={() => setSheet(null)} onDone={setMessage} />}
       {sheet?.kind === 'replace' && (
         <ReplaceSheet
           plans={plans}

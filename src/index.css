@@ -1,34 +1,25 @@
 @import "tailwindcss";
 
-/* 테마 3종 — accent(장식·진행 바) / soft(배경 강조) / ink(글자). 글자색은 반드시 ink 사용 */
-:root,
-[data-theme="amber"] {
+/* 따뜻한 웜 톤 한 가지 — accent(장식·진행 바) / soft(배경 강조) / ink(글자). 글자색은 반드시 ink 사용 */
+:root {
   --theme-accent: #f59e0b;
   --theme-soft: #fef3c7;
   --theme-ink: #92400e;
-}
-[data-theme="blue"] {
-  --theme-accent: #3b82f6;
-  --theme-soft: #dbeafe;
-  --theme-ink: #1e40af;
-}
-[data-theme="green"] {
-  --theme-accent: #10b981;
-  --theme-soft: #d1fae5;
-  --theme-ink: #065f46;
 }
 
 @theme inline {
   --font-sans: "IBM Plex Sans KR", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Jua", "IBM Plex Sans KR", sans-serif;
 
-  /* 테마 색상 (런타임 전환) */
+  /* 대표 색 */
   --color-accent: var(--theme-accent);
   --color-soft: var(--theme-soft);
   --color-ink: var(--theme-ink);
 
   /* 공통 토큰 */
   --color-bg: #fffbf5;
+  /* 대표 이미지(맘마 로고 일러스트)의 바탕색. 이미지와 화면 배경을 이어 붙일 때 쓴다 */
+  --color-cream: #fef6e1;
   --color-card: #ffffff;
   --color-line: #efe4d6;
   --color-text: #2b2118;
@@ -55,6 +46,13 @@
   --color-plan-dot: #d6c7b4;
   --color-bar-off: #e7d9c5;
   --color-sat: #1d4ed8;
+
+  /* 소셜 로그인 버튼 (각 서비스의 브랜드 색. 테마와 무관하게 고정) */
+  --color-kakao: #fee500;
+  --color-kakao-ink: rgb(0 0 0 / 0.85);
+  --color-naver: #03c75a;
+  --color-google-line: #747775;
+  --color-google-ink: #1f1f1f;
   --color-low: #9a3412;
   --color-low-bg: #fff7ed;
   --color-low-line: #fdba74;

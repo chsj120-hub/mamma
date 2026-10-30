@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { PcBarChart, type Bar } from '../../components/desktop/PcBarChart'
 import { PrintDialog } from '../../components/print/PrintDialog'
 import { IngredientIcon } from '../../components/IngredientIcon'
+import { GrowthCard } from '../../components/report/GrowthCard'
 import { testBadge } from '../../components/report/TestRecordCard'
 import { RetryTip } from '../../components/RetryTip'
 import { useAppData } from '../../lib/data'
@@ -280,6 +281,8 @@ export function PcReportPage() {
           <RetryTip className="mt-auto" />
         </section>
       </div>
+
+      <GrowthCard />
 
       <p className="m-0 text-xs text-muted">리포트는 기록을 바탕으로 한 참고 자료예요. 성장이나 알레르기가 걱정되면 소아청소년과와 상담해 주세요.</p>
       {printing && <PrintDialog initialKind={'report'} onClose={() => setPrinting(false)} />}

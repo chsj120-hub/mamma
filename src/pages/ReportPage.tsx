@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { GrowthCard } from '../components/report/GrowthCard'
 import { IntakeChart } from '../components/report/IntakeChart'
 import { MilestoneCard } from '../components/report/MilestoneCard'
 import { StageCard } from '../components/report/StageCard'
@@ -43,6 +44,7 @@ export function ReportPage() {
       <main className="flex flex-col gap-3.5 px-5">
         <StageCard bars={stageProgress(profile, today)} />
         <IntakeChart days={weekIntake(plans, week)} dailyTarget={profile.targetMl * profile.mealsPerDay} today={today} />
+        <GrowthCard />
         <TestRecordCard rows={ingredientTests(plans, today, reactions)} onToggleReaction={toggleReaction} />
         <RetryTip />
         <MilestoneCard group={currentGroup(profile.birthDate, today)} checked={milestones} onToggle={toggleMilestone} moreTo="/milestone" />

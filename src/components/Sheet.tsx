@@ -7,10 +7,12 @@ type Props = {
   children: ReactNode
   /** 아래에 고정되는 버튼 영역 */
   footer?: ReactNode
+  /** 표·미리보기가 있는 큰 창 (PC 폭에서 760px) */
+  wide?: boolean
 }
 
 /** 화면 아래에서 올라오는 시트 (PC 폭에서는 가운데 모달). 네이티브 <dialog> 사용 */
-export function Sheet({ open, title, onClose, children, footer }: Props) {
+export function Sheet({ open, title, onClose, children, footer, wide = false }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function Sheet({ open, title, onClose, children, footer }: Props) {
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
       aria-label={title}
-      className="m-auto mb-0 w-full max-w-[480px] rounded-t-3xl border-none bg-bg p-0 text-text backdrop:bg-black/40 sm:mb-auto sm:rounded-3xl"
+      className={`m-auto mb-0 w-full ${wide ? 'max-w-[760px]' : 'max-w-[480px]'} rounded-t-3xl border-none bg-bg p-0 text-text backdrop:bg-black/40 sm:mb-auto sm:rounded-3xl`}
     >
       <div className="flex max-h-[88dvh] flex-col">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">

@@ -1,7 +1,7 @@
 // 출력(인쇄·PDF) 설정과 기간 계산
 import { addDays, addMonths, md, monthStart, weekStart } from './date'
 
-export type PrintKind = 'week' | 'month' | 'report' | 'cube' | 'milestone'
+export type PrintKind = 'week' | 'month' | 'report' | 'cube' | 'milestone' | 'allergen'
 export type PrintRange = 'current' | 'prev' | 'next' | 'custom'
 export type PrintOptions = { icons: boolean; allergen: boolean; shopping: boolean; memo: boolean }
 export type Paper = 'portrait' | 'landscape'
@@ -22,6 +22,7 @@ export const PRINT_KINDS: { id: PrintKind; name: string; sub: string }[] = [
   { id: 'report', name: '성장 리포트', sub: '섭취량 · 알레르기 기록' },
   { id: 'cube', name: '홈큐브 재고표', sub: '수량 · 소진 기한' },
   { id: 'milestone', name: '마일스톤 체크리스트', sub: '단계별 체크 · 체크한 날짜' },
+  { id: 'allergen', name: '알레르기 기록 (병원용)', sub: '재료별 테스트 날짜 · 반응' },
 ]
 
 /** 종류마다 의미 있는 '포함할 항목' */
@@ -31,6 +32,7 @@ export const OPTION_FOR: Record<PrintKind, (keyof PrintOptions)[]> = {
   report: ['icons', 'allergen', 'memo'],
   cube: ['icons', 'shopping', 'memo'],
   milestone: ['memo'],
+  allergen: [],
 }
 
 /** 기간을 고르는 종류 (홈큐브는 오늘 기준, 마일스톤은 전체) */

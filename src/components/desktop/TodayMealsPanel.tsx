@@ -1,15 +1,17 @@
 import { koreanTime } from '../../lib/date'
 import { ingredientName } from '../../lib/ingredients'
 import { mealItems, mealTitle, sortMeals } from '../../lib/meal'
-import type { Meal } from '../../lib/types'
+import type { Meal, Taste } from '../../lib/types'
+import { TastePicker } from '../TastePicker'
 
 type Props = {
   meals: Meal[]
   onToggle: (mealId: string) => void
+  onTaste: (mealId: string, taste: Taste | undefined) => void
 }
 
 /** PC 오른쪽 '오늘의 식단' (한 줄 요약 + 완료 토글) */
-export function TodayMealsPanel({ meals, onToggle }: Props) {
+export function TodayMealsPanel({ meals, onToggle, onTaste }: Props) {
   const sorted = sortMeals(meals)
   const doneCount = sorted.filter((m) => m.status === 'done').length
 
@@ -27,7 +29,8 @@ export function TodayMealsPanel({ meals, onToggle }: Props) {
       {sorted.map((m) => {
         const done = m.status === 'done'
         return (
-          <div key={m.id} className={`flex items-center gap-3 rounded-2xl border-[1.5px] px-3.5 py-3 transition-colors ${done ? 'border-done-line bg-done-bg' : 'border-line bg-card'}`}>
+          <div key={m.id} className={`flex flex-col gap-2 rounded-2xl border-[1.5px] px-3.5 py-3 transition-colors ${done ? 'border-done-line bg-done-bg' : 'border-line bg-card'}`}>
+            <div className="flex items-center gap-3">
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-xs text-muted">
                 {koreanTime(m.time)} · {m.label}
@@ -53,6 +56,8 @@ export function TodayMealsPanel({ meals, onToggle }: Props) {
               )}
               {done ? '완료' : '예정'}
             </button>
+            </div>
+            {done && <TastePicker compact value={m.taste} onChange={(t) => onTaste(m.id, t)} />}
           </div>
         )
       })}

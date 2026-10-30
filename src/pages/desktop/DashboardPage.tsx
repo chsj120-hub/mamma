@@ -1,11 +1,15 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { CubeAttentionPanel } from '../../components/desktop/CubeAttentionPanel'
+import { CsvImportDialog } from '../../components/desktop/CsvImportDialog'
 import { PrintDialog } from '../../components/print/PrintDialog'
 import { PcCalendar, PcCalendarLegend } from '../../components/desktop/PcCalendar'
 import { TodayMealsPanel } from '../../components/desktop/TodayMealsPanel'
 import { AllergenNotice } from '../../components/AllergenNotice'
+import { ShareWeekButton } from '../../components/ShareWeekButton'
+import { StageNotice } from '../../components/StageNotice'
 import { ExpiryAlert } from '../../components/home/ExpiryAlert'
 import { NutritionCard } from '../../components/home/NutritionCard'
+import { AiFillSheet } from '../../components/planner/AiFillSheet'
 import { DayEditorSheet } from '../../components/planner/DayEditorSheet'
 import { HistorySheet } from '../../components/planner/HistorySheet'
 import type { PlannerView } from '../../components/planner/PlannerHeader'
@@ -13,11 +17,11 @@ import { ReplaceSheet } from '../../components/planner/ReplaceSheet'
 import { expiringCubes } from '../../lib/cube'
 import { useAppData } from '../../lib/data'
 import { addDays, addMonths, dayCount, daysInMonth, DOW_KO, dowOf, md, monthStart, todayKey, weekStart } from '../../lib/date'
-import { allergenTestProgress, ironDaysThisWeek, veggieKindsThisWeek } from '../../lib/meal'
+import { allergenTestProgress, ironDaysThisWeek, mealSlots, veggieKindsThisWeek } from '../../lib/meal'
 import { useStoredState } from '../../lib/storage'
 import { usePlanActions } from '../../lib/usePlanActions'
 
-type OpenSheet = { kind: 'edit'; date: string } | { kind: 'replace' } | { kind: 'history' } | null
+type OpenSheet = { kind: 'edit'; date: string } | { kind: 'aifill' } | { kind: 'replace' } | { kind: 'history' } | null
 
 const icon = (children: ReactNode) => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -27,12 +31,13 @@ const icon = (children: ReactNode) => (
 
 /** PC 대시보드 (/): 상단 동작 버튼, 기한 임박 배너, 월간·주간 캘린더 + 오른쪽 오늘 요약 */
 export function DashboardPage() {
-  const { profile, plans, cubes, commitPlans, snapshots, restoreSnapshot, toggleMealDone } = useAppData()
+  const { profile, plans, cubes, commitPlans, snapshots, restoreSnapshot, toggleMealDone, setTaste } = useAppData()
   const actions = usePlanActions()
   const today = todayKey()
   const [view, setView] = useStoredState<PlannerView>('pcCalendarView', 'month')
   const [cursor, setCursor] = useState(today)
   const [printing, setPrinting] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [sheet, setSheet] = useState<OpenSheet>(null)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -70,7 +75,7 @@ export function DashboardPage() {
           </h1>
         </div>
         <div className="flex flex-wrap gap-2 print:hidden">
-          <button type="button" onClick={() => setMessage(actions.fill(visible, today))} className={`${btn} border-none bg-ink font-bold text-white`}>
+          <button type="button" onClick={() => setSheet({ kind: 'aifill' })} className={`${btn} border-none bg-ink font-bold text-white`}>
             {icon(<path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z" />)}
             AI 추천으로 채우기
           </button>
@@ -94,6 +99,17 @@ export function DashboardPage() {
             )}
             실행취소
           </button>
+          <button type="button" onClick={() => setImporting(true)} className={`${btn} border border-line bg-card font-semibold`}>
+            {icon(
+              <>
+                <path d="M12 3v12" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 21h14" />
+              </>,
+            )}
+            CSV 입력
+          </button>
+          <ShareWeekButton weekStart={weekStart(cursor)} className={`${btn} border border-line bg-card font-semibold`} />
           <button type="button" onClick={() => setPrinting(true)} className={`${btn} border border-line bg-card font-semibold`}>
             {icon(
               <>
@@ -158,7 +174,8 @@ export function DashboardPage() {
         </section>
 
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-5">
-          <TodayMealsPanel meals={plans[today]?.meals ?? []} onToggle={(id) => toggleMealDone(today, id)} />
+          <StageNotice />
+          <TodayMealsPanel meals={plans[today]?.meals ?? []} onToggle={(id) => toggleMealDone(today, id)} onTaste={(id, t) => setTaste(today, id, t)} />
           <AllergenNotice how="캘린더에서 날짜를 눌러 '알레르기 테스트' 칸에 넣을 수 있어요." />
           <CubeAttentionPanel cubes={cubes} today={today} />
           <NutritionCard
@@ -175,7 +192,7 @@ export function DashboardPage() {
           key={sheet.date}
           date={sheet.date}
           meals={plans[sheet.date]?.meals ?? []}
-          mealsPerDay={profile.mealsPerDay}
+          slots={mealSlots(profile)}
           targetMl={profile.targetMl}
           onSave={(meals) => {
             actions.saveDay(sheet.date, meals)
@@ -185,6 +202,7 @@ export function DashboardPage() {
           onClose={() => setSheet(null)}
         />
       )}
+      {sheet?.kind === 'aifill' && <AiFillSheet dates={visible} today={today} onClose={() => setSheet(null)} onDone={setMessage} />}
       {sheet?.kind === 'replace' && (
         <ReplaceSheet
           plans={plans}
@@ -208,6 +226,7 @@ export function DashboardPage() {
           }}
         />
       )}
+      {importing && <CsvImportDialog onClose={() => setImporting(false)} onDone={setMessage} />}
       {printing && <PrintDialog initialKind={view === 'week' ? 'week' : 'month'} onClose={() => setPrinting(false)} />}
     </div>
   )

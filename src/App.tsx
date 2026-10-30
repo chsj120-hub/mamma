@@ -1,28 +1,65 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { DesktopLayout } from './components/DesktopLayout'
+import { MealReminders, MorningBrief } from './components/MealReminders'
 import { CubePage } from './pages/CubePage'
 import { DashboardPage } from './pages/desktop/DashboardPage'
 import { PcCubePage } from './pages/desktop/PcCubePage'
 import { PcMilestonePage } from './pages/desktop/PcMilestonePage'
 import { PcReportPage } from './pages/desktop/PcReportPage'
 import { HomePage } from './pages/HomePage'
+import { ConsentPage } from './pages/ConsentPage'
+import { LegalPage } from './pages/LegalPage'
+import { LoginPage } from './pages/LoginPage'
 import { MilestonePage } from './pages/MilestonePage'
+import { OnboardingPage } from './pages/OnboardingPage'
 import { PlannerPage } from './pages/PlannerPage'
 import { ReportPage } from './pages/ReportPage'
+import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { AppDataProvider } from './lib/data'
 import { useIsDesktop } from './lib/device'
-import { ThemeProvider } from './lib/theme'
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppDataProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <Routes>
+        {/* 약관·방침·계정 삭제 안내는 로그인 없이 볼 수 있는 공개 주소 */}
+        <Route path="/terms" element={<LegalPage kind="terms" />} />
+        <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+        <Route path="/delete-account" element={<LegalPage kind="delete-account" />} />
+        <Route
+          path="*"
+          element={
+            <AuthProvider>
+              <AuthGate />
+            </AuthProvider>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+/**
+ * 로그인 상태에 따라 보여 줄 화면을 정한다.
+ * 로그인 안 됨 → 로그인 화면 / 약관 동의 전 → 동의 화면 / 아기 정보 입력 전 → 아기 정보 화면 / 그 밖에는 앱
+ */
+function AuthGate() {
+  const { user, consented, onboarded } = useAuth()
+  if (!user) return <LoginPage />
+  if (!consented) return <ConsentPage />
+  return (
+    <AppDataProvider>
+      {onboarded ? (
+        <>
+          <MealReminders />
+          <MorningBrief />
           <AppRoutes />
-        </BrowserRouter>
-      </AppDataProvider>
-    </ThemeProvider>
+        </>
+      ) : (
+        <OnboardingPage />
+      )}
+    </AppDataProvider>
   )
 }
 

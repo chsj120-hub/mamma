@@ -2,6 +2,12 @@
 import { addDays, daysBetween, todayKey, weekStart } from './date'
 import type { BabyProfile, Cube, Meal, MealPlans } from './types'
 
+/**
+ * true면 저장된 데이터가 없을 때 예시 식단·홈큐브로 채운다(데모·디자인 확인용).
+ * 실제 가입 흐름에서는 새 계정이 빈 상태로 시작해야 하니 false로 둔다.
+ */
+export const SEED_SAMPLE_DATA = false
+
 export const SAMPLE_PROFILE: BabyProfile = {
   name: '주원이',
   birthDate: '2026-03-17',

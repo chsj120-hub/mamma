@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cubeStatus, daysLeft, dLabel, expiresAt, isStore, LOW_STOCK_UNDER } from '../../lib/cube'
 import { useAppData } from '../../lib/data'
-import { addDays, daysInMonth, DOW_KO, dowOf, koreanTime, md } from '../../lib/date'
+import { addDays, dayCount, daysInMonth, DOW_KO, dowOf, koreanTime, md } from '../../lib/date'
 import { ingredientName, type IngredientId } from '../../lib/ingredients'
 import { allergenStreak, daySummary, mealItems, sortMeals } from '../../lib/meal'
 import { checkedOn, currentGroup, GROUP_NAMES, isChecked, MILESTONE_GROUPS, milestoneKey, MILESTONES } from '../../lib/milestones'
@@ -29,6 +29,7 @@ export function PrintDocument({ settings, today }: Props) {
     report: `${profile.name} 성장 리포트`,
     cube: '홈큐브 재고표',
     milestone: `${profile.name} 이유식 마일스톤`,
+    allergen: `${profile.name} 알레르기 테스트 기록`,
   }[kind]
   const rangeLabel = {
     week: `${dotDate(start)} – ${shortDot(end)}`,
@@ -36,6 +37,7 @@ export function PrintDocument({ settings, today }: Props) {
     report: `${weekLabel(start)} · ${shortDot(start)} – ${shortDot(end)}`,
     cube: `${dotDate(today)} 기준`,
     milestone: `${dotDate(today)} 기준`,
+    allergen: `${dotDate(today)} 기준`,
   }[kind]
 
   const icon = (id: IngredientId, size = 14) => (options.icons ? <IngredientIcon id={id} size={size} className="shrink-0" /> : null)
@@ -57,6 +59,7 @@ export function PrintDocument({ settings, today }: Props) {
       {kind === 'report' && (
         <ReportSheet start={start} plans={plans} today={today} target={profile.targetMl * profile.mealsPerDay} icon={icon} showAllergen={options.allergen} reactions={reactions} />
       )}
+      {kind === 'allergen' && <AllergenRecordSheet today={today} />}
       {kind === 'cube' && (
         <table className="w-full border-collapse text-[11px]">
           <thead>
@@ -336,6 +339,63 @@ function ReportSheet({ start, plans, today, target, icon, showAllergen, reaction
           ))}
         </div>
       </section>
+    </div>
+  )
+}
+
+const TEST_STATE: Record<string, string> = {
+  reaction: '반응 있음 (먹이지 않음)',
+  passed: '3일 이상 먹임 · 반응 기록 없음',
+  running: '진행 중',
+  short: '3일 못 채우고 중단',
+}
+
+/** 병원 진료 때 보여 드리는 알레르기 테스트 기록. 앱에 적힌 날짜·반응 표시를 재료별로 정리한다 */
+function AllergenRecordSheet({ today }: { today: string }) {
+  const { profile, plans, reactions } = useAppData()
+  const rows = ingredientTests(plans, today, reactions).filter((r) => r.allergen && (r.status === 'reaction' || r.status === 'passed' || r.status === 'running' || r.status === 'short'))
+  const born = profile.birthDate ? `${dotDate(profile.birthDate)}생` : ''
+  return (
+    <div className="flex flex-1 flex-col gap-[3mm]">
+      <p className="m-0 text-[11px]">
+        <b>{profile.name}</b> {born}
+        {profile.birthDate ? ` · 생후 ${dayCount(profile.birthDate, today)}일` : ''}
+      </p>
+      <table className="w-full border-collapse text-[11px]">
+        <thead>
+          <tr className="border-b border-line text-left text-[10px] text-sub">
+            {['알레르기 재료', '처음 먹인 날', '연속 일수', '기록', '진료 메모'].map((h) => (
+              <th key={h} className="py-[1.5mm] font-semibold">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={5} className="py-[4mm] text-center text-sub">
+                아직 기록된 알레르기 테스트가 없어요.
+              </td>
+            </tr>
+          )}
+          {rows.map((r) => (
+            <tr key={r.id} className="border-b border-track align-top">
+              <td className="py-[2mm] font-semibold">{ingredientName(r.id)}</td>
+              <td className="py-[2mm]">{r.first ? dotDate(r.first) : '-'}</td>
+              <td className="py-[2mm]">{r.days}일</td>
+              <td className="py-[2mm]">{TEST_STATE[r.status]}</td>
+              <td className="w-[40mm] py-[2mm]" />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex min-h-[28mm] flex-1 flex-col gap-1 rounded-[2mm] border border-line p-[3mm]">
+        <b className="text-[10px] text-sub">증상·반응 메모 (날짜, 어떤 증상이었는지)</b>
+      </div>
+      <p className="m-0 text-[9px] leading-snug text-sub">
+        맘마에 기록된 날짜와 반응 표시를 정리한 자료예요. 진단 자료가 아니라 진료 때 참고용으로 보여 드리는 용도예요. 두드러기·구토·숨쉬기 힘든 모습이 보이면 바로 진료를 받아 주세요.
+      </p>
     </div>
   )
 }

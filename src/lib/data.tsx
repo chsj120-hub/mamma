@@ -2,10 +2,10 @@
 import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from 'react'
 import { newId } from './meal'
 import { useStoredState } from './storage'
-import { SAMPLE_PROFILE, sampleCubes, sampleMealPlans } from './seed'
+import { SAMPLE_PROFILE, SEED_SAMPLE_DATA, sampleCubes, sampleMealPlans } from './seed'
 import type { IngredientId } from './ingredients'
 import type { MilestoneChecks } from './milestones'
-import type { BabyProfile, Cube, MealPlans } from './types'
+import type { BabyProfile, Cube, GrowthRecord, MealPlans, Taste } from './types'
 
 export type Snapshot = { id: string; at: number; label: string; plans: MealPlans }
 
@@ -17,6 +17,8 @@ type AppData = {
   plans: MealPlans
   cubes: Cube[]
   toggleMealDone: (date: string, mealId: string) => void
+  /** 끼니 반응 한 줄 기록 (스냅샷 없이 바로 저장) */
+  setTaste: (date: string, mealId: string, taste: Taste | undefined) => void
   /** 먹은 양 기록 (스냅샷 없이 바로 저장) */
   setEatenMl: (date: string, mealId: string, ml: number | undefined) => void
   /** 식단을 바꾸기 전 상태를 스냅샷으로 남기고 next로 교체 (수정·삭제·자동 채우기·재료 대체용) */
@@ -35,17 +37,24 @@ type AppData = {
   milestones: MilestoneChecks
   /** 체크하면 지금 시각을 저장, 다시 누르면 지운다 */
   toggleMilestone: (key: string) => void
+  /** 키·몸무게·머리둘레 기록 (날짜순) */
+  growth: GrowthRecord[]
+  /** 같은 날짜 기록이 있으면 그 값에 합쳐 저장 */
+  saveGrowth: (r: Omit<GrowthRecord, 'id'>) => void
+  removeGrowth: (id: string) => void
 }
 
 const Ctx = createContext<AppData | null>(null)
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useStoredState<BabyProfile>('profile', SAMPLE_PROFILE)
-  const [plans, setPlans] = useStoredState<MealPlans>('mealPlans', () => sampleMealPlans())
-  const [cubes, setCubes] = useStoredState<Cube[]>('cubes', () => sampleCubes())
+  const [plans, setPlans] = useStoredState<MealPlans>('mealPlans', () => (SEED_SAMPLE_DATA ? sampleMealPlans() : {}))
+  const [cubes, setCubes] = useStoredState<Cube[]>('cubes', () => (SEED_SAMPLE_DATA ? sampleCubes() : []))
   const [snapshots, setSnapshots] = useStoredState<Snapshot[]>('snapshots', [])
   const [reactions, setReactions] = useStoredState<IngredientId[]>('reactions', [])
   const [milestones, setMilestones] = useStoredState<MilestoneChecks>('milestones', {})
+
+  const [growth, setGrowth] = useStoredState<GrowthRecord[]>('growth', [])
 
   const plansRef = useRef(plans)
   plansRef.current = plans
@@ -73,6 +82,28 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [setPlans],
   )
 
+  const setTaste = useCallback(
+    (date: string, mealId: string, taste: Taste | undefined) =>
+      setPlans((prev) => {
+        const day = prev[date]
+        if (!day) return prev
+        return { ...prev, [date]: { ...day, meals: day.meals.map((m) => (m.id === mealId ? { ...m, taste } : m)) } }
+      }),
+    [setPlans],
+  )
+
+  const saveGrowth = useCallback(
+    (r: Omit<GrowthRecord, 'id'>) =>
+      setGrowth((prev) => {
+        const same = prev.find((x) => x.date === r.date)
+        const next = same ? prev.map((x) => (x === same ? { ...x, ...r } : x)) : [...prev, { id: newId(), ...r }]
+        return [...next].sort((a, b) => a.date.localeCompare(b.date))
+      }),
+    [setGrowth],
+  )
+
+  const removeGrowth = useCallback((id: string) => setGrowth((prev) => prev.filter((x) => x.id !== id)), [setGrowth])
+
   const commitPlans = useCallback(
     (next: MealPlans, label: string) => {
       const prev = plansRef.current
@@ -95,7 +126,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           ...day,
           meals: day.meals.map((m) => {
             const now = records.get(m.id)
-            return now ? { ...m, status: now.status, eatenMl: now.eatenMl } : m
+            return now ? { ...m, status: now.status, eatenMl: now.eatenMl, taste: now.taste } : m
           }),
         }
       }
@@ -148,6 +179,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       cubes,
       toggleMealDone,
       setEatenMl,
+      setTaste,
       commitPlans,
       snapshots,
       restoreSnapshot,
@@ -158,8 +190,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       toggleReaction,
       milestones,
       toggleMilestone,
+      growth,
+      saveGrowth,
+      removeGrowth,
     }),
-    [profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, commitPlans, snapshots, restoreSnapshot, addCube, updateCube, removeCube, reactions, toggleReaction, milestones, toggleMilestone],
+    [profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste, commitPlans, snapshots, restoreSnapshot, addCube, updateCube, removeCube, reactions, toggleReaction, milestones, toggleMilestone, growth, saveGrowth, removeGrowth],
   )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
