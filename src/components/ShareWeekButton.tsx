@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAppData } from '../lib/data'
-import { renderWeekImage, shareOrDownload } from '../lib/shareImage'
+import { canNativeShare, copyImage, downloadBlob, renderWeekImage, shareOrDownload } from '../lib/shareImage'
 import { Sheet } from './Sheet'
 
 /** 이번 주 식단표를 이미지로 만들어 공유(휴대폰 공유 창) 또는 저장 (카카오톡·맘카페용). 아기 이름은 기본으로 빼 둔다 */
@@ -32,11 +32,24 @@ export function ShareWeekButton({ weekStart, className }: { weekStart: string; c
     }
   }, [open, weekStart, plans, withName, profile.name])
 
+  const fileName = `mamma-${weekStart}.png`
+
   const share = async () => {
     if (!blob) return
-    const r = await shareOrDownload(blob, `mamma-${weekStart}.png`, '이번 주 이유식 식단표')
-    if (r === 'downloaded') setNote('이미지를 저장했어요. 카카오톡이나 카페에 올려 보세요.')
+    const r = await shareOrDownload(blob, fileName, '이번 주 이유식 식단표')
+    if (r === 'downloaded') setNote('공유 창을 열 수 없어서 이미지를 저장했어요.')
     if (r === 'shared') setOpen(false)
+  }
+
+  const copy = async () => {
+    if (!blob) return
+    setNote((await copyImage(blob)) ? '복사했어요. 카카오톡이나 카페 글쓰기 창에서 붙여넣기(Ctrl+V)해 주세요.' : '복사하지 못했어요. 이미지 저장을 눌러 파일로 올려 주세요.')
+  }
+
+  const save = () => {
+    if (!blob) return
+    downloadBlob(blob, fileName)
+    setNote('이미지를 저장했어요. 카카오톡이나 카페에 파일로 올려 보세요.')
   }
 
   return (
@@ -49,9 +62,19 @@ export function ShareWeekButton({ weekStart, className }: { weekStart: string; c
         title="식단표 이미지"
         onClose={() => setOpen(false)}
         footer={
-          <button type="button" onClick={share} disabled={!blob} className="h-12 w-full rounded-3xl border-none bg-ink text-[15px] font-bold text-white disabled:opacity-40">
-            {typeof navigator.canShare === 'function' ? '공유하기' : '이미지 저장'}
-          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={save} disabled={!blob} className="h-12 flex-1 rounded-3xl border border-line bg-card text-[15px] font-semibold text-text disabled:opacity-40">
+              이미지 저장
+            </button>
+            <button type="button" onClick={copy} disabled={!blob} className="h-12 flex-1 rounded-3xl border border-line bg-card text-[15px] font-semibold text-text disabled:opacity-40">
+              복사
+            </button>
+            {canNativeShare() && (
+              <button type="button" onClick={share} disabled={!blob} className="h-12 flex-1 rounded-3xl border-none bg-ink text-[15px] font-bold text-white disabled:opacity-40">
+                공유하기
+              </button>
+            )}
+          </div>
         }
       >
         <label className="flex min-h-11 cursor-pointer items-center gap-3 text-[15px]">
@@ -64,7 +87,7 @@ export function ShareWeekButton({ weekStart, className }: { weekStart: string; c
             {note}
           </p>
         )}
-        <p className="m-0 text-xs leading-relaxed text-sub">생년월일은 이미지에 들어가지 않아요. 이미지 아래에 사이트 주소가 함께 들어가요.</p>
+        <p className="m-0 text-xs leading-relaxed text-sub">생년월일은 이미지에 들어가지 않아요. 이미지 아래에 사이트 주소가 함께 들어가요. 카카오톡으로는 '복사' 후 대화창에 붙여넣거나 저장한 파일을 보내 주세요.</p>
       </Sheet>
     </>
   )

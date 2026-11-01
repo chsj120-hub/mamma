@@ -9,10 +9,10 @@
 // 로그인할 때 저장된 동의 버전과 다르면 동의 화면이 다시 나와요.
 
 export const LEGAL_VERSIONS = {
-  terms: '2026-11-01',
-  privacy: '2026-11-01',
+  terms: '2026-11-02',
+  privacy: '2026-11-02',
   /** 민감정보(건강정보) 수집·이용 동의 */
-  sensitive: '2026-11-01',
+  sensitive: '2026-11-02',
 } as const
 
 export const OPERATOR = {

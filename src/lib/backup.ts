@@ -44,7 +44,12 @@ export function downloadBackup() {
   a.click()
   a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
+  save(LAST_BACKUP_KEY, new Date().toISOString())
 }
+
+/** 마지막으로 내려받은 시각(이 기기에만 기억, 서버에는 올리지 않는다). 없으면 null */
+export const LAST_BACKUP_KEY = 'lastBackupAt'
+export const lastBackupAt = () => load<string | null>(LAST_BACKUP_KEY, null)
 
 export type ParsedBackup = { ok: true; backup: BackupFile; keys: SyncKey[] } | { ok: false; message: string }
 

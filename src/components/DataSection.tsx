@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { applyBackup, downloadBackup, parseBackup, type ParsedBackup } from '../lib/backup'
+import { applyBackup, downloadBackup, lastBackupAt, parseBackup, type ParsedBackup } from '../lib/backup'
 import { sendFeedback, type FeedbackKind } from '../lib/feedback'
 import { inputCls } from './home/ProfileFields'
 import { Sheet } from './Sheet'
@@ -18,6 +18,11 @@ export function DataSection() {
   const [pending, setPending] = useState<Extract<ParsedBackup, { ok: true }> | null>(null)
   const [note, setNote] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [asking, setAsking] = useState(false)
+  const [lastBackup, setLastBackup] = useState(lastBackupAt)
+  const backup = () => {
+    downloadBackup()
+    setLastBackup(lastBackupAt())
+  }
 
   const pick = async (file: File | undefined) => {
     if (!file) return
@@ -43,7 +48,7 @@ export function DataSection() {
       <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-3.5">
         <p className="m-0 text-xs leading-[1.6] text-sub">기록을 파일로 내려받아 보관하거나, 다른 계정·기기로 옮길 때 쓸 수 있어요.</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={downloadBackup} className={btn}>
+          <button type="button" onClick={backup} className={btn}>
             기록 내려받기
           </button>
           <button type="button" onClick={() => fileRef.current?.click()} className={btn}>
@@ -63,6 +68,7 @@ export function DataSection() {
             e.target.value = ''
           }}
         />
+        <p className="m-0 text-xs text-sub">{lastBackup ? `마지막으로 내려받은 날: ${new Date(lastBackup).toLocaleDateString('ko-KR')}` : '아직 내려받은 적이 없어요. 한 번 받아 두면 안심이에요.'}</p>
         {note && (
           <p role={note.tone === 'error' ? 'alert' : 'status'} className={`m-0 text-xs font-medium ${note.tone === 'error' ? 'text-urgent' : 'text-sub'}`}>
             {note.text}
@@ -107,6 +113,7 @@ function FeedbackSheet({ open, onClose }: { open: boolean; onClose: () => void }
   const [message, setMessage] = useState('')
   const [contact, setContact] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const [errorText, setErrorText] = useState('')
 
   const close = () => {
     if (state === 'sending') return
@@ -124,7 +131,8 @@ function FeedbackSheet({ open, onClose }: { open: boolean; onClose: () => void }
     try {
       await sendFeedback(kind, message, contact)
       setState('done')
-    } catch {
+    } catch (e) {
+      setErrorText(e instanceof Error ? e.message : '보내지 못했어요. 잠시 뒤 다시 시도해 주세요.')
       setState('error')
     }
   }
@@ -183,7 +191,7 @@ function FeedbackSheet({ open, onClose }: { open: boolean; onClose: () => void }
           <p className="m-0 text-xs leading-[1.6] text-sub">아기 이름·생년월일 같은 정보는 함께 보내지지 않아요. 보낸 화면 주소와 브라우저 종류만 함께 전달돼요.</p>
           {state === 'error' && (
             <p role="alert" className="m-0 text-xs font-medium text-urgent">
-              보내지 못했어요. 잠시 뒤 다시 시도해 주세요.
+              {errorText}
             </p>
           )}
         </>

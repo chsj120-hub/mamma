@@ -3,8 +3,9 @@
 // - 데이터는 users/{uid}/data/{키} 문서들 (lib/cloud.ts). 보안 규칙(firestore.rules)이 본인만 읽고 쓰게 막는다.
 import type { User } from 'firebase/auth'
 import { LEGAL_VERSIONS } from '../data/legal'
+import { guestPrefix, readRaw, writeRaw } from '../lib/storage'
 import { pullAll, push, subscribe, SYNC_KEYS, type SyncKey } from '../lib/cloud'
-import { getDb, getFirebaseAuth } from '../lib/firebase'
+import { describeFirestoreError, getDb, getFirebaseAuth } from '../lib/firebase'
 import type { AuthService, AuthUser, FamilyService, SignInResult } from './types'
 
 const toUser = (u: User, dataUid: string): AuthUser => ({ uid: u.uid, provider: 'google', displayName: u.displayName ?? '구글 계정', email: u.email, dataUid })
@@ -35,6 +36,26 @@ async function createRegistry(uid: string) {
   await setDoc(doc(db, 'users', uid), { provider: 'google', onboarded: false, createdAt: serverTimestamp() })
 }
 
+/**
+ * 마지막으로 확인한 가입 상태를 이 기기에 남겨 둔다 (동의·아기 정보 입력 여부, 기록 주인). 비밀 정보가 아니라 화면을 고르는 표시뿐이다.
+ * 오프라인이라 서버에서 가입 기록을 읽지 못해도, 이 기기에서 로그인했던 계정이면 앱을 열 수 있게 하려는 용도다.
+ */
+const SESSION_CACHE = 'auth:lastRegistry'
+function rememberRegistry(uid: string, reg: Registry) {
+  writeRaw(guestPrefix(), SESSION_CACHE, JSON.stringify({ uid, ...reg }))
+}
+function cachedRegistry(uid: string): Registry | null {
+  try {
+    const c = JSON.parse(readRaw(guestPrefix(), SESSION_CACHE) ?? 'null') as ({ uid: string } & Registry) | null
+    return c && c.uid === uid ? { onboarded: c.onboarded, consented: c.consented, householdId: c.householdId } : null
+  } catch {
+    return null
+  }
+}
+
+/** 서버가 응답하지 않으면(오프라인·느린 망) 일정 시간 뒤 실패로 본다 */
+const withTimeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))])
+
 async function currentUserOnce() {
   const [auth, { onAuthStateChanged }] = await Promise.all([getFirebaseAuth(), import('firebase/auth')])
   return new Promise<User | null>((resolve) => {
@@ -61,8 +82,8 @@ const family: FamilyService = {
       const expires = new Date(Date.now() + INVITE_DAYS * 86_400_000)
       await fs.setDoc(fs.doc(db, 'invites', code), { owner: uid, expiresAt: fs.Timestamp.fromDate(expires) })
       return { ok: true, code, expiresAt: expires.toISOString() }
-    } catch {
-      return { ok: false, message: '초대 코드를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.' }
+    } catch (e) {
+      return { ok: false, message: describeFirestoreError(e, '초대 코드를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.') }
     }
   },
 
@@ -77,8 +98,8 @@ const family: FamilyService = {
       const [db, fs] = await Promise.all([getDb(), import('firebase/firestore')])
       await fs.deleteDoc(fs.doc(db, 'users', ownerUid, 'members', memberUid))
       return { ok: true }
-    } catch {
-      return { ok: false, message: '내보내지 못했어요. 잠시 뒤 다시 시도해 주세요.' }
+    } catch (e) {
+      return { ok: false, message: describeFirestoreError(e, '내보내지 못했어요. 잠시 뒤 다시 시도해 주세요.') }
     }
   },
 
@@ -95,8 +116,8 @@ const family: FamilyService = {
       await fs.setDoc(fs.doc(db, 'users', ownerUid, 'members', uid), { code, joinedAt: new Date().toISOString(), name: name.slice(0, 40) })
       await fs.updateDoc(fs.doc(db, 'users', uid), { householdId: ownerUid })
       return { ok: true, ownerUid }
-    } catch {
-      return { ok: false, message: '참여하지 못했어요. 코드를 확인하고 다시 시도해 주세요.' }
+    } catch (e) {
+      return { ok: false, message: describeFirestoreError(e, '참여하지 못했어요. 코드를 확인하고 다시 시도해 주세요.') }
     }
   },
 
@@ -106,8 +127,8 @@ const family: FamilyService = {
       await fs.updateDoc(fs.doc(db, 'users', uid), { householdId: uid })
       await fs.deleteDoc(fs.doc(db, 'users', ownerUid, 'members', uid))
       return { ok: true }
-    } catch {
-      return { ok: false, message: '나가지 못했어요. 잠시 뒤 다시 시도해 주세요.' }
+    } catch (e) {
+      return { ok: false, message: describeFirestoreError(e, '나가지 못했어요. 잠시 뒤 다시 시도해 주세요.') }
     }
   },
 }
@@ -118,7 +139,16 @@ export const firebaseAuthService: AuthService = {
   async restore() {
     const u = await currentUserOnce()
     if (!u) return null
-    const reg = await readRegistry(u.uid)
+    let reg: Registry | null
+    try {
+      reg = await withTimeout(readRegistry(u.uid), 6000)
+    } catch {
+      // 서버를 못 읽는 중(오프라인 등): 이 기기에서 마지막으로 확인한 상태로 연다. 없으면 로그인 화면으로 간다
+      const cached = cachedRegistry(u.uid)
+      if (!cached) throw new Error('offline')
+      return { user: toUser(u, cached.householdId), onboarded: cached.onboarded, consented: cached.consented }
+    }
+    if (reg) rememberRegistry(u.uid, reg)
     if (!reg) {
       // 로그인 정보는 있는데 가입 기록이 없는 계정 (PC에서 로그인만 하고 간 경우 등): 들어오지 못하게 로그아웃
       const [auth, { signOut }] = await Promise.all([getFirebaseAuth(), import('firebase/auth')])
@@ -135,6 +165,7 @@ export const firebaseAuthService: AuthService = {
       await fb.setPersistence(auth, keepSignedIn ? fb.browserLocalPersistence : fb.browserSessionPersistence)
       const cred = await fb.signInWithPopup(auth, new fb.GoogleAuthProvider())
       const reg = await readRegistry(cred.user.uid)
+      if (reg) rememberRegistry(cred.user.uid, reg)
 
       if (!reg) {
         if (!allowSignUp) {

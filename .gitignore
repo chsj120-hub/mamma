@@ -4,3 +4,10 @@
 .env.local
 dist
 node_modules
+
+# Firebase ê´€ë¦¬ì í‚¤(ì ˆëŒ€ ì»¤ë°‹í•˜ì§€ ì•ŠëŠ”ë‹¤)
+serviceAccount*.json
+*-adminsdk-*.json
+
+# Á¤Àû HTML ¸¸µé±â¿ë ÀÓ½Ã ¹øµé
+.ssr

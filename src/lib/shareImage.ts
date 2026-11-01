@@ -131,7 +131,32 @@ export async function renderWeekImage({ weekStart, plans, babyName, siteUrl }: S
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('이미지를 만들지 못했어요'))), 'image/png'))
 }
 
-/** 공유 창(휴대폰)을 쓸 수 있으면 열고, 아니면 PNG를 내려받는다. 어느 쪽이든 true */
+/** PNG 파일로 내려받는다 */
+export function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+/** 이미지를 클립보드에 복사한다 (붙여넣기로 카카오톡·카페 글쓰기 창에 넣을 수 있다). 실패하면 false */
+export async function copyImage(blob: Blob) {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** 휴대폰 공유 창을 쓸 수 있는지 (터치 기기에서만. PC 브라우저의 공유 창은 카카오톡이 안 뜨거나 막히는 일이 많다) */
+export const canNativeShare = () => typeof navigator.canShare === 'function' && window.matchMedia('(pointer: coarse)').matches
+
+/** 공유 창(휴대폰)을 쓸 수 있으면 열고, 아니면 PNG를 내려받는다. */
 export async function shareOrDownload(blob: Blob, fileName: string, text: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const file = new File([blob], fileName, { type: 'image/png' })
   if (navigator.canShare?.({ files: [file] })) {
@@ -142,13 +167,6 @@ export async function shareOrDownload(blob: Blob, fileName: string, text: string
       if ((e as { name?: string }).name === 'AbortError') return 'cancelled'
     }
   }
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = fileName
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  downloadBlob(blob, fileName)
   return 'downloaded'
 }

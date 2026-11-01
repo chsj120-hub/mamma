@@ -27,7 +27,7 @@ export async function pullAll(uid: string) {
  * 서버의 데이터가 바뀔 때마다 (키, JSON)을 알려 준다. 이 기기가 아직 서버에 확정하지 않은 쓰기(hasPendingWrites)는 건너뛴다.
  * 동기 함수로 구독 해제 함수를 돌려주기 위해, SDK는 안에서 불러온다.
  */
-export function subscribe(uid: string, onChange: (key: string, json: string) => void): () => void {
+export function subscribe(uid: string, onChange: (key: string, json: string) => void, onError?: (error: unknown) => void): () => void {
   let off: (() => void) | null = null
   let stopped = false
   void (async () => {
@@ -43,12 +43,15 @@ export function subscribe(uid: string, onChange: (key: string, json: string) => 
             if (typeof json === 'string' && isSyncKey(ch.doc.id)) onChange(ch.doc.id, json)
           })
         },
-        () => {
-          // 권한·네트워크 오류: 다음 로그인 때 다시 가져온다
+        (error) => {
+          // 권한·네트워크 오류: 실시간 반영만 멈춘다 (화면으로 돌아올 때 다시 가져오는 보강이 있다). 원인 파악을 위해 알린다
+          console.warn('[맘마] 실시간 동기화 연결 오류', error)
+          onError?.(error)
         },
       )
-    } catch {
-      // SDK를 못 불러오면 실시간 반영만 빠진다
+    } catch (error) {
+      console.warn('[맘마] 실시간 동기화를 시작하지 못했어요', error)
+      onError?.(error)
     }
   })()
   return () => {

@@ -1,13 +1,15 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { DesktopLayout } from './components/DesktopLayout'
-import { MealReminders, MorningBrief } from './components/MealReminders'
+import { UpdateBanner } from './components/UpdateBanner'
+import { ActivityPing, MealReminders, MorningBrief } from './components/MealReminders'
 import { CubePage } from './pages/CubePage'
 import { DashboardPage } from './pages/desktop/DashboardPage'
 import { PcCubePage } from './pages/desktop/PcCubePage'
 import { PcMilestonePage } from './pages/desktop/PcMilestonePage'
 import { PcReportPage } from './pages/desktop/PcReportPage'
 import { HomePage } from './pages/HomePage'
+import { GuideIndexPage, GuidePostPage } from './pages/GuidePages'
 import { ConsentPage } from './pages/ConsentPage'
 import { LegalPage } from './pages/LegalPage'
 import { LoginPage } from './pages/LoginPage'
@@ -22,8 +24,11 @@ import { useIsDesktop } from './lib/device'
 export default function App() {
   return (
     <BrowserRouter>
+      <UpdateBanner />
       <Routes>
         {/* 약관·방침·계정 삭제 안내는 로그인 없이 볼 수 있는 공개 주소 */}
+        <Route path="/guide" element={<GuideIndexPage />} />
+        <Route path="/guide/:slug" element={<GuidePostRoute />} />
         <Route path="/terms" element={<LegalPage kind="terms" />} />
         <Route path="/privacy" element={<LegalPage kind="privacy" />} />
         <Route path="/delete-account" element={<LegalPage kind="delete-account" />} />
@@ -40,6 +45,11 @@ export default function App() {
   )
 }
 
+function GuidePostRoute() {
+  const { slug = '' } = useParams()
+  return <GuidePostPage slug={slug} />
+}
+
 /**
  * 로그인 상태에 따라 보여 줄 화면을 정한다.
  * 로그인 안 됨 → 로그인 화면 / 약관 동의 전 → 동의 화면 / 아기 정보 입력 전 → 아기 정보 화면 / 그 밖에는 앱
@@ -54,6 +64,7 @@ function AuthGate() {
         <>
           <MealReminders />
           <MorningBrief />
+          <ActivityPing />
           <AppRoutes />
         </>
       ) : (

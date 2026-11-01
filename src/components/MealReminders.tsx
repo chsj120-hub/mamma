@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '../auth/AuthProvider'
+import { recordActivity } from '../lib/activity'
 import { expiringCubes } from '../lib/cube'
 import { useAppData } from '../lib/data'
 import { todayKey } from '../lib/date'
@@ -136,4 +138,13 @@ export function MorningBrief() {
       </button>
     </div>
   )
+}
+
+/** 앱을 열었을 때 하루 한 번 '활성 가구' 접속일을 남긴다 (화면에는 아무것도 그리지 않는다) */
+export function ActivityPing() {
+  const { user } = useAuth()
+  useEffect(() => {
+    if (user) void recordActivity(user.uid, user.dataUid)
+  }, [user])
+  return null
 }

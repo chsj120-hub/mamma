@@ -24,14 +24,6 @@ export async function askPermission(): Promise<NotifyPermission> {
   }
 }
 
-/** 앱 시작 때 한 번 등록한다. 지원하지 않거나 실패해도 앱은 그대로 동작한다 */
-export function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
-  })
-}
-
 /** 시스템 알림을 띄운다 (허용되지 않았으면 아무것도 안 하고 false) */
 export async function showSystemNotification(title: string, body: string, tag: string) {
   if (notifyPermission() !== 'granted') return false

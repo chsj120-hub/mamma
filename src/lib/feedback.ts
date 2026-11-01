@@ -1,7 +1,7 @@
 // 문의·오류 신고를 운영자에게 보낸다. 서버(Firestore)가 있으면 feedback/·errors/ 컬렉션에 새 글로 쌓이고(읽기 금지),
 // 설정이 없는 개발 환경에서는 이 기기에만 남긴다. 아기 정보·계정 식별자는 보내지 않는다.
 // 비밀 키가 필요한 알림(이메일·텔레그램)은 서버 함수에서 한다 — docs/OPERATIONS.md
-import { cloudEnabled, getDb } from './firebase'
+import { cloudEnabled, describeFirestoreError, getDb } from './firebase'
 import { load, save } from './storage'
 
 export type FeedbackKind = 'bug' | 'idea' | 'other'
@@ -17,7 +17,11 @@ async function add(collectionName: 'feedback' | 'errors', data: Record<string, s
     return
   }
   const [db, { addDoc, collection }] = await Promise.all([getDb(), import('firebase/firestore')])
-  await addDoc(collection(db, collectionName), data)
+  try {
+    await addDoc(collection(db, collectionName), data)
+  } catch (e) {
+    throw new Error(describeFirestoreError(e, '보내지 못했어요.'))
+  }
 }
 
 export async function sendFeedback(kind: FeedbackKind, message: string, contact: string) {

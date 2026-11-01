@@ -45,7 +45,7 @@ export type CloudAdapter = {
    * 다른 기기에서 바뀐 값이 도착하면 (키, JSON 문자열)로 알려 준다. 이 기기가 방금 올린 값은 알리지 않는다.
    * 반환값을 부르면 구독을 끝낸다.
    */
-  subscribe(uid: string, onChange: (key: string, json: string) => void): () => void
+  subscribe(uid: string, onChange: (key: string, json: string) => void, onError?: (error: unknown) => void): () => void
 }
 
 export type FamilyMember = { uid: string; name: string; joinedAt: string }

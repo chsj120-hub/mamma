@@ -147,13 +147,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       // 다른 기기(PC↔모바일)에서 바뀐 값을 실시간으로 받아 화면에 반영한다
       if (cloud) {
-        unsubscribe.current = cloud.subscribe(u.dataUid, (key, json) => {
-          if (!isSyncKey(key) || lastKnown.current.get(key) === json) return
-          if (pending.current.has(key)) return // 이 기기에서 아직 못 올린 변경이 있으면 그게 먼저 (곧 올라간다)
-          lastKnown.current.set(key, json)
-          writeRaw(prefix, key, json)
-          notifyRemoteChange(key)
-        })
+        unsubscribe.current = cloud.subscribe(
+          u.dataUid,
+          (key, json) => {
+            if (!isSyncKey(key) || lastKnown.current.get(key) === json) return
+            if (pending.current.has(key)) return // 이 기기에서 아직 못 올린 변경이 있으면 그게 먼저 (곧 올라간다)
+            lastKnown.current.set(key, json)
+            writeRaw(prefix, key, json)
+            notifyRemoteChange(key)
+          },
+          () => {
+            setSyncStatus('error')
+            setSyncError('실시간 반영 연결이 끊겼어요. 화면으로 돌아올 때 새로 불러와요.')
+          },
+        )
       }
       setUser(u)
       setOnboarded(isOnboarded)
@@ -185,6 +192,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       disposed = true
     }
   }, [activate])
+
+  // 실시간 연결이 불안정해도 다른 기기의 변경을 놓치지 않게, 화면으로 돌아오거나 인터넷이 다시 연결될 때 서버 값을 한 번 확인한다
+  const lastRefresh = useRef(0)
+  const refreshFromServer = useCallback(async () => {
+    const cloud = authService.cloud
+    const dataUid = dataUidRef.current
+    const u = userRef.current
+    if (!cloud || !dataUid || !u || Date.now() - lastRefresh.current < 10_000) return
+    lastRefresh.current = Date.now()
+    try {
+      const remote = await cloud.pullAll(dataUid)
+      const prefix = userPrefix(u.uid)
+      for (const [key, json] of Object.entries(remote)) {
+        if (!isSyncKey(key) || lastKnown.current.get(key) === json || pending.current.has(key)) continue
+        lastKnown.current.set(key, json)
+        writeRaw(prefix, key, json)
+        notifyRemoteChange(key)
+      }
+    } catch {
+      // 오프라인 등: 다음 기회에
+    }
+  }, [])
+
+  useEffect(() => {
+    const onVisible = () => document.visibilityState === 'visible' && void refreshFromServer()
+    const onOnline = () => void refreshFromServer()
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onOnline)
+    window.addEventListener('online', onOnline)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onOnline)
+      window.removeEventListener('online', onOnline)
+    }
+  }, [refreshFromServer])
 
   // 탭을 닫거나 숨길 때 아직 못 보낸 변경을 보낸다 (최선 노력)
   useEffect(() => {

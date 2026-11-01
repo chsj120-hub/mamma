@@ -82,6 +82,18 @@ service cloud.firestore {
       }
     }
 
+    // 접속일 기록(활성 가구 측정): 로그인한 사용자가 자기 가구의 오늘 기록 한 건만 새로 쓸 수 있고 읽을 수 없다.
+    // expireAt에 Firestore TTL 정책을 걸어 90일 뒤 자동 삭제한다 (docs/ANALYTICS.md)
+    match /activity/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['d', 'h', 'expireAt'])
+        && request.resource.data.d is string && request.resource.data.d.size() == 10
+        && request.resource.data.h is string
+        && id == request.resource.data.d + '_' + request.resource.data.h
+        && request.resource.data.expireAt is timestamp
+        && (isOwner(request.resource.data.h) || isMember(request.resource.data.h));
+    }
+
     // 가족 초대 코드: 코드를 아는 로그인 사용자만 하나씩 읽을 수 있다(목록 조회 금지). 만든 사람만 지운다. 최대 7일
     match /invites/{code} {
       allow get: if request.auth != null;

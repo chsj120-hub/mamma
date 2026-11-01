@@ -46,6 +46,9 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 - 사용자 데이터는 uid별로 분리되고, 로그인하면 서버(`users/{uid}/data/{키}`)와 동기화된다 (불러오기 + 저장 + 실시간 구독). 서버에 올리는 키는 `src/lib/cloud.ts`의 `SYNC_KEYS`
 - 웹앱 전용(스토어 앱·설치 없음, 링크·도메인으로 접속). 모바일·PC 모두 로그인 화면에서 바로 가입된다. 보안 규칙은 `firestore.rules` (규칙을 바꾸면 Firebase 콘솔에도 게시해야 한다)
 - 설정 방법과 동작 설명: `docs/FIREBASE_SETUP.md`
+- 오프라인 캐시: `src/sw.ts`(Workbox, vite-plugin-pwa injectManifest). 앱 파일만 캐시하고 Firebase·구글 주소는 캐시하지 않는다. 새 버전은 `UpdateBanner`로 안내(`lib/pwa.ts`). 오프라인 로그인 복원은 `auth/firebaseAuthService.ts`의 `rememberRegistry`
+- 활성 가구 측정: 하루 한 번 `activity/{날짜}_{가구}` 기록(`lib/activity.ts`), 집계는 `npm run stats -- --key <관리자키>`. 방문 분석은 `lib/analytics.ts`. `docs/ANALYTICS.md`
+- 공개 가이드 `/guide`: 글은 `src/content/guide/*.json`(draft로 시작), 빌드 때 `scripts/prerender.mjs`가 정적 HTML·sitemap·robots를 만든다. 건강 수치는 출처 확인 뒤에만, `docs/GUIDE_CONTENT.md`
 - 약관·동의·탈퇴: 흐름은 로그인 → 동의(`pages/ConsentPage.tsx`) → 아기 정보 → 앱. 공개 페이지 `/terms` `/privacy` `/delete-account`는 `App.tsx`에서 인증 밖에 있다. 문서 버전·운영자 정보는 `src/data/legal.ts`, 본문은 `src/data/legalText.ts`. 약관을 고치면 `LEGAL_VERSIONS`를 올려 다시 동의를 받는다. 자세한 건 `docs/LEGAL.md`
 
 ## 디자인 규칙

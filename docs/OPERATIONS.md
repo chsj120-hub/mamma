@@ -18,7 +18,7 @@
 | 11 | 회원 탈퇴(테스트 계정) | 로그인 화면으로, 콘솔에서 `users/{uid}` 및 하위 문서 삭제, Authentication 사용자 삭제 |
 | 12 | 로그아웃한 채 `/terms` `/privacy` `/delete-account` | 열림 |
 
-**규칙을 바꿀 때마다** `firestore.rules`를 콘솔에 다시 게시해야 해요. 이번 변경으로 `growth` 키, `feedback`·`errors`·`invites` 컬렉션, 가족 구성원(`members`), 동의(`consent`)가 추가됐어요.
+**규칙을 바꿀 때마다** `firestore.rules`를 콘솔에 다시 게시해야 해요. 이번 변경으로 `growth` 키, `feedback`·`errors`·`invites`·`activity` 컬렉션, 가족 구성원(`members`), 동의(`consent`)가 추가됐어요. **문의·오류 신고, 가족 초대 코드, 접속일 기록은 규칙을 게시하지 않으면 전부 '권한 거부'로 실패해요**(앱은 이제 그 경우 화면에 이유를 알려 줘요).
 
 ## 2. 문의·오류 확인 (P0-5, P0-7)
 - 앱 안 "문의·오류 신고" → `feedback` 컬렉션(종류, 내용, 답받을 이메일(선택), 화면 주소, 브라우저 종류).

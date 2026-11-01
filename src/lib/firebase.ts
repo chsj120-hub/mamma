@@ -35,6 +35,15 @@ function ensureApp() {
   return appPromise
 }
 
+/** Firestore 오류를 콘솔에 남기고(원인 파악용), 규칙 문제면 그렇다고 알려 주는 문구를 돌려준다 */
+export function describeFirestoreError(e: unknown, fallback: string) {
+  const code = (e as { code?: string })?.code ?? ''
+  console.warn('[맘마] 서버 오류', code, e)
+  if (code === 'permission-denied') return `${fallback} (서버 규칙이 이 기능을 아직 허용하지 않아요. 운영자가 Firebase 규칙을 게시해야 해요)`
+  if (code === 'unavailable' || code === 'failed-precondition') return `${fallback} (인터넷 연결을 확인해 주세요)`
+  return fallback
+}
+
 export async function getFirebaseAuth() {
   const [app, { getAuth }] = await Promise.all([ensureApp(), import('firebase/auth')])
   return getAuth(app)
