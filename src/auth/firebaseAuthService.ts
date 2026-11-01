@@ -3,12 +3,27 @@
 // - 데이터는 users/{uid}/data/{키} 문서들 (lib/cloud.ts). 보안 규칙(firestore.rules)이 본인만 읽고 쓰게 막는다.
 import type { User } from 'firebase/auth'
 import { LEGAL_VERSIONS } from '../data/legal'
+import { exchangeKakaoCode, kakaoConfigured, startKakaoRedirect, takeKakaoCallback } from './kakao'
 import { guestPrefix, readRaw, writeRaw } from '../lib/storage'
 import { pullAll, push, subscribe, SYNC_KEYS, type SyncKey } from '../lib/cloud'
 import { describeFirestoreError, getDb, getFirebaseAuth } from '../lib/firebase'
 import type { AuthService, AuthUser, FamilyService, SignInResult } from './types'
 
-const toUser = (u: User, dataUid: string): AuthUser => ({ uid: u.uid, provider: 'google', displayName: u.displayName ?? '구글 계정', email: u.email, dataUid })
+const providerOf = (u: User) => (u.uid.startsWith('kakao:') ? ('kakao' as const) : ('google' as const))
+
+/** 표시 이름: 구글은 계정 이름, 카카오는 로그인 때 받은 닉네임(토큰 클레임). 못 읽으면 기본 이름 */
+async function displayNameOf(u: User): Promise<string> {
+  if (u.displayName) return u.displayName
+  try {
+    const claim = (await u.getIdTokenResult()).claims.name
+    if (typeof claim === 'string' && claim) return claim
+  } catch {
+    // 오프라인 등
+  }
+  return providerOf(u) === 'kakao' ? '카카오 계정' : '구글 계정'
+}
+
+const toUser = (u: User, dataUid: string, name: string): AuthUser => ({ uid: u.uid, provider: providerOf(u), displayName: name, email: u.email, dataUid })
 
 type Registry = { onboarded: boolean; consented: boolean; householdId: string }
 
@@ -31,9 +46,9 @@ async function readRegistry(uid: string): Promise<Registry | null> {
   return { onboarded: snap.data().onboarded === true, consented, householdId }
 }
 
-async function createRegistry(uid: string) {
+async function createRegistry(uid: string, provider: 'google' | 'kakao') {
   const [db, { doc, serverTimestamp, setDoc }] = await Promise.all([getDb(), import('firebase/firestore')])
-  await setDoc(doc(db, 'users', uid), { provider: 'google', onboarded: false, createdAt: serverTimestamp() })
+  await setDoc(doc(db, 'users', uid), { provider, onboarded: false, createdAt: serverTimestamp() })
 }
 
 /**
@@ -133,6 +148,62 @@ const family: FamilyService = {
   },
 }
 
+/** 로그인 직후 가입 기록(users/{uid})을 확인하고, 없으면 만들거나(가입) 막는다. 구글·카카오가 같이 쓴다 */
+async function finishSignIn(user: User, provider: 'google' | 'kakao', allowSignUp: boolean): Promise<SignInResult> {
+  const [auth, { signOut }] = await Promise.all([getFirebaseAuth(), import('firebase/auth')])
+  const name = await displayNameOf(user)
+  const reg = await readRegistry(user.uid)
+  if (reg) rememberRegistry(user.uid, reg)
+
+  if (!reg) {
+    if (!allowSignUp) {
+      await signOut(auth)
+      return { kind: 'not-registered' }
+    }
+    await createRegistry(user.uid, provider)
+    return { kind: 'signed-in', user: toUser(user, user.uid, name), created: true, onboarded: false, consented: false }
+  }
+  if (!allowSignUp && !reg.onboarded) {
+    await signOut(auth)
+    return { kind: 'incomplete' }
+  }
+  return { kind: 'signed-in', user: toUser(user, reg.householdId, name), created: false, onboarded: reg.onboarded, consented: reg.consented }
+}
+
+function signInErrorResult(e: unknown): SignInResult {
+  const code = (e as { code?: string }).code
+  if (code === 'auth/unauthorized-domain') return { kind: 'error', message: '이 주소는 로그인이 허용되지 않았어요. (Firebase 승인된 도메인에 추가가 필요해요)' }
+  if (code === 'permission-denied' || /permission/i.test(String((e as Error).message))) return { kind: 'error', message: '서버 접근이 거부됐어요. Firestore 보안 규칙을 게시했는지 확인해 주세요.' }
+  return { kind: 'error', message: '로그인하지 못했어요. 잠시 뒤 다시 시도해 주세요.' }
+}
+
+/**
+ * 카카오 로그인. 처음 누르면 카카오 페이지로 이동하고(이 함수는 끝나지 않는다), 카카오에서 돌아온 뒤 앱이 다시 이 함수를 불러
+ * 코드를 중계 서버에서 Firebase 커스텀 토큰으로 바꿔 로그인한다.
+ */
+async function signInWithKakao(allowSignUp: boolean, keepSignedIn: boolean): Promise<SignInResult> {
+  if (!kakaoConfigured) return { kind: 'error', message: '카카오 로그인이 아직 설정되지 않았어요.' }
+  const cb = takeKakaoCallback()
+  if (!cb) {
+    startKakaoRedirect(keepSignedIn)
+    return new Promise<SignInResult>(() => {}) // 페이지가 넘어가므로 돌아오지 않는다
+  }
+  if ('error' in cb) {
+    if (cb.error === 'denied') return { kind: 'cancelled' }
+    return { kind: 'error', message: cb.error === 'state' ? '카카오 로그인 확인에 실패했어요. 다시 시도해 주세요.' : '카카오 로그인에 실패했어요. 잠시 뒤 다시 시도해 주세요.' }
+  }
+  try {
+    const { token } = await exchangeKakaoCode(cb.code)
+    const [auth, fb] = await Promise.all([getFirebaseAuth(), import('firebase/auth')])
+    await fb.setPersistence(auth, cb.keep ? fb.browserLocalPersistence : fb.browserSessionPersistence)
+    const cred = await fb.signInWithCustomToken(auth, token)
+    return await finishSignIn(cred.user, 'kakao', allowSignUp)
+  } catch (e) {
+    console.warn('[맘마] 카카오 로그인 오류', e)
+    return signInErrorResult(e)
+  }
+}
+
 export const firebaseAuthService: AuthService = {
   name: 'firebase',
 
@@ -146,7 +217,7 @@ export const firebaseAuthService: AuthService = {
       // 서버를 못 읽는 중(오프라인 등): 이 기기에서 마지막으로 확인한 상태로 연다. 없으면 로그인 화면으로 간다
       const cached = cachedRegistry(u.uid)
       if (!cached) throw new Error('offline')
-      return { user: toUser(u, cached.householdId), onboarded: cached.onboarded, consented: cached.consented }
+      return { user: toUser(u, cached.householdId, await displayNameOf(u)), onboarded: cached.onboarded, consented: cached.consented }
     }
     if (reg) rememberRegistry(u.uid, reg)
     if (!reg) {
@@ -155,38 +226,22 @@ export const firebaseAuthService: AuthService = {
       await signOut(auth)
       return null
     }
-    return { user: toUser(u, reg.householdId), onboarded: reg.onboarded, consented: reg.consented }
+    return { user: toUser(u, reg.householdId, await displayNameOf(u)), onboarded: reg.onboarded, consented: reg.consented }
   },
 
   async signIn(provider, { allowSignUp, keepSignedIn }): Promise<SignInResult> {
-    if (provider !== 'google') return { kind: 'error', message: '지금은 Google 로그인만 쓸 수 있어요.' }
+    if (provider === 'kakao') return signInWithKakao(allowSignUp, keepSignedIn)
+    if (provider !== 'google') return { kind: 'error', message: '지금은 Google·카카오 로그인만 쓸 수 있어요.' }
     const [auth, fb] = await Promise.all([getFirebaseAuth(), import('firebase/auth')])
     try {
       await fb.setPersistence(auth, keepSignedIn ? fb.browserLocalPersistence : fb.browserSessionPersistence)
       const cred = await fb.signInWithPopup(auth, new fb.GoogleAuthProvider())
-      const reg = await readRegistry(cred.user.uid)
-      if (reg) rememberRegistry(cred.user.uid, reg)
-
-      if (!reg) {
-        if (!allowSignUp) {
-          await fb.signOut(auth)
-          return { kind: 'not-registered' }
-        }
-        await createRegistry(cred.user.uid)
-        return { kind: 'signed-in', user: toUser(cred.user, cred.user.uid), created: true, onboarded: false, consented: false }
-      }
-      if (!allowSignUp && !reg.onboarded) {
-        await fb.signOut(auth)
-        return { kind: 'incomplete' }
-      }
-      return { kind: 'signed-in', user: toUser(cred.user, reg.householdId), created: false, onboarded: reg.onboarded, consented: reg.consented }
+      return await finishSignIn(cred.user, 'google', allowSignUp)
     } catch (e) {
       const code = (e as { code?: string }).code
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return { kind: 'cancelled' }
       if (code === 'auth/popup-blocked') return { kind: 'error', message: '팝업이 막혀 있어요. 이 사이트의 팝업을 허용하고 다시 눌러 주세요.' }
-      if (code === 'auth/unauthorized-domain') return { kind: 'error', message: '이 주소는 로그인이 허용되지 않았어요. (Firebase 승인된 도메인에 추가가 필요해요)' }
-      if (code === 'permission-denied' || /permission/i.test(String((e as Error).message))) return { kind: 'error', message: '서버 접근이 거부됐어요. Firestore 보안 규칙을 게시했는지 확인해 주세요.' }
-      return { kind: 'error', message: '로그인하지 못했어요. 잠시 뒤 다시 시도해 주세요.' }
+      return signInErrorResult(e)
     }
   },
 
@@ -213,7 +268,9 @@ export const firebaseAuthService: AuthService = {
     try {
       // 계정을 지우려면 최근(약 5분 안)에 로그인한 기록이 필요하다. 오래됐으면 구글 계정을 한 번 더 확인한다
       const lastSignIn = Date.parse(current.metadata.lastSignInTime ?? '')
-      if (!(Date.now() - lastSignIn < 4 * 60_000)) await fb.reauthenticateWithPopup(current, new fb.GoogleAuthProvider())
+      const stale = !(Date.now() - lastSignIn < 4 * 60_000)
+      if (stale && providerOf(current) === 'kakao') return { ok: false, message: '보안을 위해 다시 로그인한 뒤 바로 탈퇴해 주세요. (로그아웃 → 카카오로 로그인 → 5분 안에 회원 탈퇴)' }
+      if (stale) await fb.reauthenticateWithPopup(current, new fb.GoogleAuthProvider())
     } catch (e) {
       const code = (e as { code?: string }).code
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return { ok: false, message: '구글 계정 확인을 취소했어요. 탈퇴하지 않았어요.' }

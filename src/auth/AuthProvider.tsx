@@ -6,6 +6,7 @@ import { createContext, Fragment, useCallback, useContext, useEffect, useMemo, u
 import { isSyncKey, SYNC_KEYS } from '../lib/cloud'
 import { adoptGuestData, clearPrefix, guestPrefix, notifyRemoteChange, readRaw, removeRaw, setSaveListener, setStoragePrefix, userPrefix, writeRaw } from '../lib/storage'
 import { authService } from './index'
+import { hasKakaoCallback } from './kakao'
 import type { AuthUser, DeleteAccountResult, FamilyMember, FamilyResult, Provider, SignInOptions, SignInResult } from './types'
 
 export type SyncStatus = 'off' | 'idle' | 'saving' | 'saved' | 'error'
@@ -227,6 +228,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('online', onOnline)
     }
   }, [refreshFromServer])
+
+  // 카카오 로그인 페이지에서 돌아왔다면(주소의 코드가 기억돼 있다면) 로그인을 마무리한다
+  useEffect(() => {
+    if (ready && uidRef.current === null && hasKakaoCallback()) void signIn('kakao', { allowSignUp: true, keepSignedIn: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready])
 
   // 탭을 닫거나 숨길 때 아직 못 보낸 변경을 보낸다 (최선 노력)
   useEffect(() => {

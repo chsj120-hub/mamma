@@ -41,7 +41,7 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 
 - 화면 코드는 `useAuth()`(`src/auth/AuthProvider.tsx`)와 `AuthService` 인터페이스(`src/auth/types.ts`)만 안다. 구현은 `src/auth/index.ts`에서 고른다
   - Firebase 설정(`VITE_FIREBASE_*`)이 있으면 `firebaseAuthService`(Google 로그인 + Firestore), 없으면 `mockAuthService`(가짜 로그인, 개발용)
-  - 지금은 **Google만** 노출 (`ENABLED_PROVIDERS`). 카카오·네이버는 서버 함수가 필요해 다음 단계
+  - 노출 소셜은 `ENABLED_PROVIDERS` (Google, 카카오는 설정 후). 네이버는 다음 단계
 - 가족 공유: 초대 코드로 참여하면 `AuthUser.dataUid`(기록 주인 uid)가 초대한 사람의 uid가 된다. 서버 호출(pullAll·push·subscribe)은 `dataUid`, 로그인·동의·탈퇴는 `uid`. 규칙·구조는 `docs/OPERATIONS.md` §4
 - 사용자 데이터는 uid별로 분리되고, 로그인하면 서버(`users/{uid}/data/{키}`)와 동기화된다 (불러오기 + 저장 + 실시간 구독). 서버에 올리는 키는 `src/lib/cloud.ts`의 `SYNC_KEYS`
 - 웹앱 전용(스토어 앱·설치 없음, 링크·도메인으로 접속). 모바일·PC 모두 로그인 화면에서 바로 가입된다. 보안 규칙은 `firestore.rules` (규칙을 바꾸면 Firebase 콘솔에도 게시해야 한다)
@@ -51,6 +51,7 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 - 문의·오류 텔레그램 알림: `scripts/inbox.mjs` + `.github/workflows/inbox.yml`. 봇 토큰은 서버(Actions Secrets/내 PC 환경변수)에만, 앱 코드에는 절대 넣지 않는다. `docs/NOTIFY_SETUP.md`
 - 가족 초대 링크: `/join/<코드>`로 들어오면 `lib/invite.ts`가 코드를 기억하고, 로그인·동의 뒤 `JoinInvitePage`가 참여를 확인한다(새 가입자는 아기 정보 입력을 건너뜀)
 - 확인이 필요한 건강 수치·출처 불일치는 `docs/OPEN_ISSUES.md`, 방침 점검은 `docs/PRIVACY_CHECKLIST.md`, 법률 검토 절차·비용은 `docs/LEGAL_REVIEW.md`
+- 카카오 로그인: 브라우저는 카카오 로그인 페이지로 이동했다 `/auth/kakao?code=…`로 돌아오고(`auth/kakao.ts`), 코드는 Cloudflare Worker(`workers/kakao-auth/`)가 클라이언트 시크릿으로 확인해 Firebase 커스텀 토큰(uid `kakao:<회원번호>`)을 만들어 준다. OIDC(Identity Platform)는 유료라 쓰지 않는다. 클라이언트 시크릿·서비스 계정 키는 Worker 비밀 값에만. `VITE_ENABLE_KAKAO=true`일 때만 버튼 노출. 켜기 전 방침·동의 갱신 필수. `docs/KAKAO_LOGIN.md`
 - 활성 가구 측정: 하루 한 번 `activity/{날짜}_{가구}` 기록(`lib/activity.ts`), 집계는 `npm run stats -- --key <관리자키>`. 방문 분석은 `lib/analytics.ts`. `docs/ANALYTICS.md`
 - 공개 가이드 `/guide`: 글은 `src/content/guide/*.json`(draft로 시작), 빌드 때 `scripts/prerender.mjs`가 정적 HTML·sitemap·robots를 만든다. 건강 수치는 출처 확인 뒤에만, `docs/GUIDE_CONTENT.md`
 - 약관·동의·탈퇴: 흐름은 로그인 → 동의(`pages/ConsentPage.tsx`) → 아기 정보 → 앱. 공개 페이지 `/terms` `/privacy` `/delete-account`는 `App.tsx`에서 인증 밖에 있다. 문서 버전·운영자 정보는 `src/data/legal.ts`, 본문은 `src/data/legalText.ts`. 약관을 고치면 `LEGAL_VERSIONS`를 올려 다시 동의를 받는다. 자세한 건 `docs/LEGAL.md`
@@ -88,7 +89,7 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 
 ## 지금은 하지 않는 것
 
-- 카카오·네이버 로그인, 닫힌 앱 푸시 알림 — 다음 단계
+- 네이버 로그인, 닫힌 앱 푸시 알림 — 다음 단계
 - 로그인 토큰은 localStorage에 직접 저장하지 않는다 (Firebase SDK가 관리)
 - GUIDE.md의 텔레그램 예시처럼 **봇 토큰·비밀 키를 클라이언트 코드에 넣지 않는다**. 반드시 서버나 Cloud Function을 거친다
 - 아기 이름·생년월일·보호자 이메일 외 민감 정보는 수집하지 않는다

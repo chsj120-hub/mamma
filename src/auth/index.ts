@@ -8,8 +8,9 @@ import type { AuthService, Provider } from './types'
 
 export const authService: AuthService = cloudEnabled ? firebaseAuthService : mockAuthService
 
-/** 로그인 화면에 보여 줄 소셜. 지금은 Google만 (카카오·네이버는 서버 작업이 필요해서 다음 단계) */
-export const ENABLED_PROVIDERS: Provider[] = ['google']
+/** 로그인 화면에 보여 줄 소셜. 카카오는 중계 서버 설정 뒤 VITE_ENABLE_KAKAO=true로 켠다(docs/KAKAO_LOGIN.md). 네이버는 다음 단계 */
+const kakaoOn = !cloudEnabled || import.meta.env.VITE_ENABLE_KAKAO === 'true'
+export const ENABLED_PROVIDERS: Provider[] = kakaoOn ? ['kakao', 'google'] : ['google']
 
 export { PROVIDERS, PROVIDER_NAME } from './types'
 export type { AuthService, AuthUser, Provider, SignInOptions, SignInResult } from './types'

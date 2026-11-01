@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import vercel from './vercel.json'
+import vercel from './vercel.json' with { type: 'json' }
 
 // 보안 헤더는 vercel.json 한 곳에서 관리한다. 빌드 결과 미리보기(vite preview)에도 같은 헤더를 걸어 브라우저 콘솔에서 확인할 수 있게 하고,
 // Cloudflare Pages용 _headers 파일은 빌드 때 이 값으로 만든다(scripts/prerender.mjs)

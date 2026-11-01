@@ -92,7 +92,7 @@ export function PcLogin() {
         <div className="flex w-full max-w-[420px] flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <h2 className="m-0 text-[28px] font-bold">로그인</h2>
-            <p className="m-0 text-[15px] leading-[1.6] text-sub">Google 계정으로 로그인해요. 처음이면 다음 화면에서 약관 동의 후 바로 가입돼요.</p>
+            <p className="m-0 text-[15px] leading-[1.6] text-sub">소셜 계정으로 로그인해요. 처음이면 다음 화면에서 약관 동의 후 바로 가입돼요.</p>
           </div>
 
           {notice === 'deleted' && (

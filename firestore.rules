@@ -20,7 +20,7 @@ service cloud.firestore {
       // 가입: 처음 한 번, 가입 완료 전(onboarded=false) 상태로만 만들 수 있다
       allow create: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['provider', 'onboarded', 'createdAt'])
-        && request.resource.data.provider == 'google'
+        && request.resource.data.provider in ['google', 'kakao']
         && request.resource.data.onboarded == false;
 
       // 두 가지 수정만 허용한다

@@ -1,0 +1,15 @@
+# 카카오 로그인 중계 Worker 배포 설정. 절차: docs/KAKAO_LOGIN.md
+name = "mamma-kakao-auth"
+main = "index.mjs"
+compatibility_date = "2025-01-01"
+
+[vars]
+# 로그인을 허용할 사이트 주소들(쉼표로 구분). 자체 도메인을 연결하면 새 주소를 추가한다.
+# 개발 PC(localhost)도 쓰려면 http://localhost:5173 을 더한다.
+ALLOWED_ORIGINS = "https://mamma-one.vercel.app"
+
+# 비밀 값은 여기에 쓰지 않는다. 아래 명령으로 하나씩 넣는다 (docs/KAKAO_LOGIN.md)
+#   npx wrangler secret put KAKAO_REST_API_KEY
+#   npx wrangler secret put KAKAO_CLIENT_SECRET
+#   npx wrangler secret put FIREBASE_SA_EMAIL
+#   npx wrangler secret put FIREBASE_SA_PRIVATE_KEY
