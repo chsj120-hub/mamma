@@ -5,6 +5,7 @@ import iconUrl from '../../assets/brand/icon.webp'
 import wordmarkUrl from '../../assets/brand/wordmark.webp'
 import { LegalLinks } from '../../components/LegalLinks'
 import { IngredientIcon } from '../../components/IngredientIcon'
+import { ShareApp } from '../../components/ShareApp'
 import { SocialButton } from '../../components/login/SocialButton'
 import type { IngredientId } from '../../lib/ingredients'
 
@@ -134,6 +135,8 @@ export function PcLogin() {
               휴대폰 브라우저에서 이 주소를 열고 같은 Google 계정으로 로그인하면 식단이 그대로 이어져요. 앱 설치는 필요 없어요. 브라우저 메뉴의 "홈 화면에 추가"를 쓰면 앱처럼 바로 열 수 있어요.
             </span>
           </div>
+
+          <ShareApp source="share-login" withQr className="items-center" />
 
           <p className="m-0 text-center text-xs text-sub">
             <LegalLinks /> ·{' '}

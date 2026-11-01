@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { GUIDE_POSTS, getPost, postsByCategory, publishedPosts, type GuidePost } from '../lib/guide'
 import { usePageMeta } from '../lib/pageMeta'
+import { ShareApp } from '../components/ShareApp'
 
 // 이 파일의 컴포넌트는 브라우저와 빌드 때 정적 HTML 만들기(src/prerender.tsx)에서 똑같이 쓰인다.
 // 그래서 라우터·저장소·로그인 같은 것에 기대지 않고 일반 <a> 링크만 쓴다.
@@ -212,6 +213,8 @@ function Article({ post }: { post: GuidePost }) {
       <a href="/" className="flex min-h-12 items-center justify-center rounded-3xl bg-ink px-6 text-[15px] font-bold text-white no-underline">
         맘마에서 우리 아기 식단 짜기
       </a>
+
+      <ShareApp source="share-guide" />
 
       {related.length > 0 && (
         <nav aria-label="관련 글" className="flex flex-col gap-1.5">

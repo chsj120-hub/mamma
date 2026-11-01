@@ -1,6 +1,7 @@
 import { ENABLED_PROVIDERS, type Provider } from '../../auth'
 import { useAuth } from '../../auth/AuthProvider'
 import { LegalLinks } from '../../components/LegalLinks'
+import { ShareApp } from '../../components/ShareApp'
 import heroUrl from '../../assets/brand/hero.webp'
 import { SocialButton } from '../../components/login/SocialButton'
 import { load, save } from '../../lib/storage'
@@ -49,6 +50,7 @@ export function AppLogin() {
           <LegalLinks />
         </p>
         <div className="mt-1 flex items-center justify-center rounded-xl bg-bg px-3 py-2.5 text-xs text-sub">PC에서도 같은 주소로 접속해 같은 계정으로 로그인하면 큰 화면으로 볼 수 있어요</div>
+        <ShareApp source="share-login" className="items-center" />
       </section>
     </div>
   )

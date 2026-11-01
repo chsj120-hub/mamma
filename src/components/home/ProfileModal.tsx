@@ -4,6 +4,7 @@ import type { BabyProfile } from '../../lib/types'
 import { AccountSection } from '../AccountSection'
 import { DataSection } from '../DataSection'
 import { FamilySection } from '../FamilySection'
+import { ShareApp } from '../ShareApp'
 import { NotifySettings } from '../NotifySettings'
 import { Sheet } from '../Sheet'
 import { hasProblems, ProfileFields, profileProblems } from './ProfileFields'
@@ -53,6 +54,11 @@ export function ProfileModal({ open, profile, onSave, onClose }: Props) {
         <FamilySection />
 
         <DataSection />
+
+        <section className="flex flex-col gap-2">
+          <h3 className="m-0 text-[13px] font-semibold text-sub">맘마 알리기</h3>
+          <ShareApp source="share-settings" withQr />
+        </section>
 
         <section className="flex flex-col gap-2">
           <h3 className="m-0 text-[13px] font-semibold text-sub">계정</h3>
