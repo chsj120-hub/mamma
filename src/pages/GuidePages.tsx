@@ -182,6 +182,16 @@ function Article({ post }: { post: GuidePost }) {
             ))}
           </ul>
         )}
+        {post.books && post.books.length > 0 && (
+          <>
+            <h3 className="m-0 mt-1 text-[13px] font-bold">참고 도서</h3>
+            <ul className="m-0 flex list-disc flex-col gap-1 pl-5 text-[13px] leading-[1.6] text-text">
+              {post.books.map((b) => (
+                <li key={b}>{b}</li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
 
       <p className="m-0 text-xs leading-relaxed text-sub">이 글은 일반적인 참고 정보예요. 새 재료나 알레르기 재료를 시작하기 전, 아기의 건강이 걱정될 때는 소아청소년과와 상담해 주세요.</p>

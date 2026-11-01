@@ -17,6 +17,8 @@ export type GuidePost = {
   /** 출처. 건강 수치를 쓴 글은 공공기관·학회 원문 링크가 반드시 있어야 한다 */
   sources: { label: string; url: string }[]
   faq?: { q: string; a: string }[]
+  /** 참고한 도서(링크 없이 책 이름만). 공개 글에는 '참고 도서'로 따로 보인다 */
+  books?: string[]
 }
 
 const modules = import.meta.glob<GuidePost>('../content/guide/*.json', { eager: true, import: 'default' })
