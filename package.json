@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build && vite build -c vite.ssr.config.ts --ssr src/prerender.tsx --outDir .ssr && node scripts/prerender.mjs",
     "preview": "vite preview",
     "test": "vitest run",
-    "stats": "node scripts/stats.mjs"
+    "stats": "node scripts/stats.mjs",
+    "inbox": "node scripts/inbox.mjs"
   },
   "dependencies": {
     "firebase": "^13.1.0",

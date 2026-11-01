@@ -1,5 +1,4 @@
 *.local
-.env
 .env.*.local
 .env.local
 dist
@@ -9,5 +8,5 @@ node_modules
 serviceAccount*.json
 *-adminsdk-*.json
 
-# Á¤Àû HTML ¸¸µé±â¿ë ÀÓ½Ã ¹øµé
+# ì •ì  HTML ë§Œë“¤ê¸°ìš© ì„ì‹œ ë²ˆë“¤
 .ssr

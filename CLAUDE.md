@@ -47,6 +47,8 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 - 웹앱 전용(스토어 앱·설치 없음, 링크·도메인으로 접속). 모바일·PC 모두 로그인 화면에서 바로 가입된다. 보안 규칙은 `firestore.rules` (규칙을 바꾸면 Firebase 콘솔에도 게시해야 한다)
 - 설정 방법과 동작 설명: `docs/FIREBASE_SETUP.md`
 - 오프라인 캐시: `src/sw.ts`(Workbox, vite-plugin-pwa injectManifest). 앱 파일만 캐시하고 Firebase·구글 주소는 캐시하지 않는다. 새 버전은 `UpdateBanner`로 안내(`lib/pwa.ts`). 오프라인 로그인 복원은 `auth/firebaseAuthService.ts`의 `rememberRegistry`
+- 보안 헤더는 `vercel.json`이 단일 원본(CSP는 Report-Only 단계). 현황·켜는 순서는 `docs/SECURITY.md`. `.env`는 비밀이 없는 공개 설정(VITE_SITE_URL)이라 저장소에 올리고, 비밀은 `.env.local`에만
+- 문의·오류 텔레그램 알림: `scripts/inbox.mjs` + `.github/workflows/inbox.yml`. 봇 토큰은 서버(Actions Secrets/내 PC 환경변수)에만, 앱 코드에는 절대 넣지 않는다. `docs/NOTIFY_SETUP.md`
 - 활성 가구 측정: 하루 한 번 `activity/{날짜}_{가구}` 기록(`lib/activity.ts`), 집계는 `npm run stats -- --key <관리자키>`. 방문 분석은 `lib/analytics.ts`. `docs/ANALYTICS.md`
 - 공개 가이드 `/guide`: 글은 `src/content/guide/*.json`(draft로 시작), 빌드 때 `scripts/prerender.mjs`가 정적 HTML·sitemap·robots를 만든다. 건강 수치는 출처 확인 뒤에만, `docs/GUIDE_CONTENT.md`
 - 약관·동의·탈퇴: 흐름은 로그인 → 동의(`pages/ConsentPage.tsx`) → 아기 정보 → 앱. 공개 페이지 `/terms` `/privacy` `/delete-account`는 `App.tsx`에서 인증 밖에 있다. 문서 버전·운영자 정보는 `src/data/legal.ts`, 본문은 `src/data/legalText.ts`. 약관을 고치면 `LEGAL_VERSIONS`를 올려 다시 동의를 받는다. 자세한 건 `docs/LEGAL.md`

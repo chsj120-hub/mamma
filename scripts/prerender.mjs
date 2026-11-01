@@ -55,7 +55,13 @@ writeFileSync(
     .join('\n')}\n</urlset>\n`,
 )
 
-// 3) robots.txt: 로그인 뒤 화면 주소는 따로 막을 필요가 없다(로그인 없이 내용이 안 보인다). 사이트맵 위치만 알린다
+// 3) Cloudflare Pages용 _headers: vercel.json의 보안 헤더를 그대로 옮긴다 (Vercel은 vercel.json을 직접 읽는다)
+const vercel = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'))
+const NL = String.fromCharCode(10)
+const headerBlocks = vercel.headers.map((h) => [h.source, ...h.headers.map((x) => `  ${x.key}: ${x.value}`)].join(NL))
+writeFileSync(join(dist, '_headers'), headerBlocks.join(NL + NL) + NL)
+
+// 4) robots.txt: 로그인 뒤 화면 주소는 따로 막을 필요가 없다(로그인 없이 내용이 안 보인다). 사이트맵 위치만 알린다
 writeFileSync(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`)
 
 console.log(`정적 HTML ${list.length}개, sitemap ${urls.length}개 주소 (${SITE})`)

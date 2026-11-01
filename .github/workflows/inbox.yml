@@ -1,0 +1,39 @@
+# 새 문의·오류를 15분마다 확인해서 텔레그램으로 알려 준다. 설정: docs/NOTIFY_SETUP.md
+# 필요한 Secrets (저장소 Settings → Secrets and variables → Actions): TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, FIREBASE_SERVICE_ACCOUNT
+name: 문의·오류 텔레그램 알림
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inbox
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 필요한 것만 설치
+        run: |
+          mkdir -p "$RUNNER_TEMP/inbox"
+          cp scripts/inbox.mjs "$RUNNER_TEMP/inbox/"
+          cd "$RUNNER_TEMP/inbox"
+          npm init -y > /dev/null
+          npm install firebase-admin > /dev/null
+      - name: 새 문의·오류 확인
+        working-directory: ${{ runner.temp }}/inbox
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node inbox.mjs
