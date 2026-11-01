@@ -10,7 +10,8 @@
 
 ## 1회 설정
 1. **규칙 게시**: `firestore.rules`를 콘솔 → Firestore → 규칙에 붙여넣고 게시 (`activity` 컬렉션 규칙이 새로 들어갔어요).
-2. **90일 자동 삭제(TTL)**: 콘솔 → Firestore → **TTL**(또는 '데이터 → TTL 정책') → 정책 추가 → 컬렉션 그룹 `activity`, 필드 `expireAt`. 안 해도 앱은 동작하지만 기록이 안 지워져요(방침의 90일을 지키려면 꼭 설정).
+2. **90일 삭제**: TTL 정책은 Firebase 콘솔이 아니라 **Google Cloud 콘솔**(Firestore → Time-to-live)에서 만들어요(컬렉션 그룹 `activity`, 필드 `expireAt`). 권한 오류(403)로 안 되면 대체: 한 달에 한 번 `npm run stats -- --key "키경로" --prune`을 실행해 만료된 기록을 지워요. 둘 중 하나는 꼭 해야 방침의 90일을 지킬 수 있어요.
+   - PowerShell에서 `npm`이 "스크립트를 실행할 수 없습니다"(실행 정책)라고 하면 `npm.cmd run stats -- --key ...`로 실행하거나, 명령 프롬프트(cmd)를 써요.
 3. **방문 분석(선택)**: Cloudflare 대시보드 → Web Analytics → 사이트 추가 → 호스트 이름 입력 → 나오는 토큰을 `VITE_CF_ANALYTICS_TOKEN`으로 Vercel/Cloudflare Pages 환경변수와 `.env.local`에 넣고 재배포. 도메인을 바꾸면 사이트를 새 호스트 이름으로 다시 추가해요. 개발 서버(`npm run dev`)에서는 켜지지 않아요.
 
 ## 숫자 보는 법 (운영자 PC에서)

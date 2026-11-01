@@ -1,5 +1,6 @@
 // 활성 가구 집계 (운영자가 내 PC에서 실행). 사용법과 준비물은 docs/ANALYTICS.md
-//   node scripts/stats.mjs --key C:\경로\serviceAccount.json
+//   node scripts/stats.mjs --key C:\경로\serviceAccount.json            (집계 보기)
+//   node scripts/stats.mjs --key C:\경로\serviceAccount.json --prune    (90일이 지난 접속 기록 삭제. TTL 정책을 못 쓸 때 한 달에 한 번)
 // 관리자 키는 Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → 새 비공개 키 생성. 절대 git에 올리지 않는다(.gitignore에 패턴이 있다).
 import { readFileSync } from 'node:fs'
 import { initializeApp, cert } from 'firebase-admin/app'
@@ -21,6 +22,20 @@ const mondayOf = (key) => {
   return addDays(key, -((dow + 6) % 7))
 }
 const today = dayKey(new Date())
+
+if (args.includes('--prune')) {
+  // expireAt(만료 시각)이 지난 접속 기록을 지운다. 지울 대상을 먼저 세어 보여 주고 지운다
+  const { Timestamp } = await import('firebase-admin/firestore')
+  const old = await db.collection('activity').where('expireAt', '<', Timestamp.now()).get()
+  console.log(`만료된 접속 기록 ${old.size}건을 지워요.`)
+  for (let i = 0; i < old.docs.length; i += 400) {
+    const batch = db.batch()
+    old.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref))
+    await batch.commit()
+  }
+  console.log('끝났어요.')
+  process.exit(0)
+}
 
 const usersCount = (await db.collection('users').count().get()).data().count
 const onboarded = (await db.collection('users').where('onboarded', '==', true).count().get()).data().count
