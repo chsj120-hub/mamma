@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { DesktopLayout } from './components/DesktopLayout'
@@ -11,6 +12,8 @@ import { PcReportPage } from './pages/desktop/PcReportPage'
 import { HomePage } from './pages/HomePage'
 import { GuideIndexPage, GuidePostPage } from './pages/GuidePages'
 import { ConsentPage } from './pages/ConsentPage'
+import { JoinInvitePage } from './pages/JoinInvitePage'
+import { pendingInvite } from './lib/invite'
 import { LegalPage } from './pages/LegalPage'
 import { LoginPage } from './pages/LoginPage'
 import { MilestonePage } from './pages/MilestonePage'
@@ -56,8 +59,11 @@ function GuidePostRoute() {
  */
 function AuthGate() {
   const { user, consented, onboarded } = useAuth()
+  // 초대 링크로 들어왔으면 로그인·동의 뒤에 '가족 기록에 참여' 화면을 먼저 보여 준다
+  const [invite, setInvite] = useState(pendingInvite)
   if (!user) return <LoginPage />
   if (!consented) return <ConsentPage />
+  if (invite) return <JoinInvitePage code={invite} onDone={() => setInvite(null)} />
   return (
     <AppDataProvider>
       {onboarded ? (

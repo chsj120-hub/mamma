@@ -49,6 +49,8 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 - 오프라인 캐시: `src/sw.ts`(Workbox, vite-plugin-pwa injectManifest). 앱 파일만 캐시하고 Firebase·구글 주소는 캐시하지 않는다. 새 버전은 `UpdateBanner`로 안내(`lib/pwa.ts`). 오프라인 로그인 복원은 `auth/firebaseAuthService.ts`의 `rememberRegistry`
 - 보안 헤더는 `vercel.json`이 단일 원본(CSP는 Report-Only 단계). 현황·켜는 순서는 `docs/SECURITY.md`. `.env`는 비밀이 없는 공개 설정(VITE_SITE_URL)이라 저장소에 올리고, 비밀은 `.env.local`에만
 - 문의·오류 텔레그램 알림: `scripts/inbox.mjs` + `.github/workflows/inbox.yml`. 봇 토큰은 서버(Actions Secrets/내 PC 환경변수)에만, 앱 코드에는 절대 넣지 않는다. `docs/NOTIFY_SETUP.md`
+- 가족 초대 링크: `/join/<코드>`로 들어오면 `lib/invite.ts`가 코드를 기억하고, 로그인·동의 뒤 `JoinInvitePage`가 참여를 확인한다(새 가입자는 아기 정보 입력을 건너뜀)
+- 확인이 필요한 건강 수치·출처 불일치는 `docs/OPEN_ISSUES.md`, 방침 점검은 `docs/PRIVACY_CHECKLIST.md`, 법률 검토 절차·비용은 `docs/LEGAL_REVIEW.md`
 - 활성 가구 측정: 하루 한 번 `activity/{날짜}_{가구}` 기록(`lib/activity.ts`), 집계는 `npm run stats -- --key <관리자키>`. 방문 분석은 `lib/analytics.ts`. `docs/ANALYTICS.md`
 - 공개 가이드 `/guide`: 글은 `src/content/guide/*.json`(draft로 시작), 빌드 때 `scripts/prerender.mjs`가 정적 HTML·sitemap·robots를 만든다. 건강 수치는 출처 확인 뒤에만, `docs/GUIDE_CONTENT.md`
 - 약관·동의·탈퇴: 흐름은 로그인 → 동의(`pages/ConsentPage.tsx`) → 아기 정보 → 앱. 공개 페이지 `/terms` `/privacy` `/delete-account`는 `App.tsx`에서 인증 밖에 있다. 문서 버전·운영자 정보는 `src/data/legal.ts`, 본문은 `src/data/legalText.ts`. 약관을 고치면 `LEGAL_VERSIONS`를 올려 다시 동의를 받는다. 자세한 건 `docs/LEGAL.md`
@@ -66,7 +68,7 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 
 - 생후 일수: `Date.UTC`로 날짜만 비교 (`src/lib/date.ts`). `new Date()` 차이를 직접 나누지 말 것
 - 재고 부족: 큐브 2개 미만 / 유통기한 임박: 남은 기한 3일 이내 또는 만료
-- 소진 기한: 직접 만든 큐브는 제조일 + 고기·생선 21일, 그 외 14일 / 시판 큐브는 포장에 적힌 소비기한(`Cube.source`, `Cube.expiresOn`)
+- 소진 기한: 직접 만든 큐브는 제조일 + 7일(재료 구분 없음, 질병관리청 '식이영양(영유아)': 조리한 이유식은 냉동 1주일 이내) / 시판 큐브는 포장에 적힌 소비기한(`Cube.source`, `Cube.expiresOn`)
 - 알레르기 테스트는 같은 재료 3일 연속. 알레르기 재료 목록은 `ALLERGENS` (달걀·우유·밀·대두·땅콩·견과·참깨·생선·갑각류)
 - 단계 기준(월령·횟수·1회량·한 끼 재료 수)은 `src/data/stageGuide.ts`, 재료별 도입 단계·순서는 `src/data/ingredientIntro.ts`. 숫자·순서는 여기서만 바꾼다 (자동 채우기 `lib/recommender.ts`와 화면 안내가 함께 따름)
 - 자동 채우기: 새 재료는 한 번에 하나·3일 연속·첫 끼에, 섞는 재료는 3일 통과한 것만, 반응 있었던 재료 제외
@@ -81,7 +83,7 @@ React 19 + Vite + Tailwind CSS 4 + TypeScript, react-router. GitHub: chsj120-hub
 
 - 권장량·횟수·기간처럼 아기 건강에 관한 **숫자는 출처(학회 원문, 공공기관 자료) 또는 담당 소아과 전문의 확인 후에만** 넣는다. 확인 전이면 값을 비워 두고 화면에 '입력 전'으로 보여 준다
 - 숫자를 새로 넣을 땐 파일 주석에 출처를 적는다. 육아 사이트·블로그의 '공통값'은 출처로 충분하지 않다
-- 현재 앱의 수치: 보관 21/14일·재고 2개·임박 3일(PRD), 3일 테스트(PRD), 새 음식 8~10번 재시도(사용자 제공 안내 문구), 채소 다양성 막대 10종(화면 눈금일 뿐 권장치 아님), `stageGuide.ts`(사용자 관리)
+- 현재 앱의 수치: 보관 7일(질병관리청)·재고 2개·임박 3일(PRD), 3일 테스트(PRD), 새 음식 8~10번 재시도(사용자 제공 안내 문구), 채소 다양성 막대 10종(화면 눈금일 뿐 권장치 아님), `stageGuide.ts`(사용자 관리)
 - 의료적 판단처럼 들리는 문구엔 '소아청소년과와 상의' 안내를 함께 둔다
 
 ## 지금은 하지 않는 것

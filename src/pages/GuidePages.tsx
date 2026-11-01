@@ -121,6 +121,11 @@ function Article({ post }: { post: GuidePost }) {
       </div>
 
       {post.draft && <DraftNote />}
+      {post.experience && (
+        <p role="note" className="m-0 rounded-xl bg-soft px-4 py-3 text-[13px] leading-[1.6] text-text">
+          직접 해 본 경험을 적은 글이에요. 모든 아기에게 똑같지 않고, 의학적 조언이 아니에요. 새 재료나 아기 건강이 걱정되면 소아청소년과와 상담해 주세요.
+        </p>
+      )}
 
       {post.sections.length > 2 && (
         <nav aria-label="목차" className="rounded-2xl border border-line bg-card px-4 py-3">
@@ -140,6 +145,12 @@ function Article({ post }: { post: GuidePost }) {
       {post.sections.map((s, i) => (
         <section key={s.h} id={`s${i}`} className="flex scroll-mt-4 flex-col gap-2.5">
           <h2 className="m-0 text-xl font-bold">{s.h}</h2>
+          {s.img && (
+            <figure className="m-0 flex flex-col gap-1.5">
+              <img src={s.img.src} alt={s.img.alt} width={s.img.w} height={s.img.h} loading="lazy" className="h-auto w-full rounded-xl border border-line" />
+              {s.img.caption && <figcaption className="text-xs leading-relaxed text-sub">{s.img.caption}</figcaption>}
+            </figure>
+          )}
           {s.p?.map((t) => (
             <p key={t} className="m-0 text-[15px] leading-[1.8] text-text">
               {t}
@@ -167,6 +178,7 @@ function Article({ post }: { post: GuidePost }) {
         </section>
       )}
 
+      {!((post.howto || post.experience) && post.sources.length === 0) && (
       <section className="flex flex-col gap-2 rounded-2xl border border-line bg-card px-4 py-3" aria-label="출처">
         <h2 className="m-0 text-base font-bold">출처</h2>
         {post.sources.length === 0 ? (
@@ -193,6 +205,7 @@ function Article({ post }: { post: GuidePost }) {
           </>
         )}
       </section>
+      )}
 
       <p className="m-0 text-xs leading-relaxed text-sub">이 글은 일반적인 참고 정보예요. 새 재료나 알레르기 재료를 시작하기 전, 아기의 건강이 걱정될 때는 소아청소년과와 상담해 주세요.</p>
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import type { FamilyMember } from '../auth/types'
 import { inputCls } from './home/ProfileFields'
+import { inviteLink } from '../lib/invite'
 import { Sheet } from './Sheet'
 
 /** 가족과 함께 쓰기: 초대 코드를 만들어 공동 양육자를 초대하거나, 받은 코드로 참여한다 (프로필 수정 창) */
@@ -48,14 +49,28 @@ export function FamilySection() {
     else setNote({ tone: 'error', text: r.message })
   }
 
-  const copy = async () => {
-    if (!invite) return
+  const copy = async (text: string, done: string) => {
     try {
-      await navigator.clipboard.writeText(invite.code)
-      setNote({ tone: 'ok', text: '코드를 복사했어요. 메신저로 보내 주세요.' })
+      await navigator.clipboard.writeText(text)
+      setNote({ tone: 'ok', text: done })
     } catch {
-      setNote({ tone: 'error', text: '복사하지 못했어요. 코드를 직접 적어 전해 주세요.' })
+      setNote({ tone: 'error', text: '복사하지 못했어요. 직접 적어 전해 주세요.' })
     }
+  }
+
+  /** 휴대폰에서는 공유 창(카카오톡 등)으로 바로 보낸다. 지원하지 않는 브라우저는 복사로 대신한다 */
+  const share = async () => {
+    if (!invite) return
+    const link = inviteLink(invite.code)
+    if (typeof navigator.share === 'function' && window.matchMedia('(pointer: coarse)').matches) {
+      try {
+        await navigator.share({ title: '맘마 가족 초대', text: '맘마에서 함께 이유식 식단을 관리해요.', url: link })
+        return
+      } catch (e) {
+        if ((e as { name?: string }).name === 'AbortError') return
+      }
+    }
+    await copy(link, '초대 링크를 복사했어요. 카카오톡 등으로 보내 주세요.')
   }
 
   const btn = 'min-h-11 rounded-[22px] border border-line bg-card px-4 text-[13px] font-semibold text-text disabled:opacity-50'
@@ -86,11 +101,16 @@ export function FamilySection() {
                   <b className="font-display text-2xl tracking-[0.12em]" aria-label={`초대 코드 ${invite.code.split('').join(' ')}`}>
                     {invite.code}
                   </b>
-                  <button type="button" onClick={copy} className={btn}>
-                    복사
+                  <button type="button" onClick={() => copy(invite.code, '코드를 복사했어요. 메신저로 보내 주세요.')} className={btn}>
+                    코드 복사
                   </button>
                 </div>
-                <span className="text-xs leading-relaxed text-sub">코드를 아는 사람은 누구나 참여할 수 있어요. 믿는 가족에게만 보내 주세요.</span>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={share} className="min-h-11 rounded-[22px] border-none bg-ink px-4 text-[13px] font-bold text-white">
+                    초대 링크 보내기
+                  </button>
+                </div>
+                <span className="text-xs leading-relaxed text-sub">링크를 열면 로그인한 뒤 바로 참여 화면이 나와요. 링크나 코드를 아는 사람은 누구나 참여할 수 있으니 믿는 가족에게만 보내 주세요.</span>
               </div>
             )}
             {members.length > 0 && (

@@ -8,8 +8,8 @@ export const EXPIRY_WARN_DAYS = 3
 
 export const isStore = (c: Cube) => c.source === 'store'
 
-/** 소진 기한: 시판은 포장의 소비기한, 직접 만든 큐브는 제조일 + 권장 보관 기간 */
-export const expiresAt = (c: Cube) => (isStore(c) && c.expiresOn ? c.expiresOn : addDays(c.madeAt, shelfLifeDays(c.ingredient)))
+/** 소진 기한: 시판은 포장의 소비기한, 직접 만든 큐브는 제조일 + 7일(질병관리청 안내) */
+export const expiresAt = (c: Cube) => (isStore(c) && c.expiresOn ? c.expiresOn : addDays(c.madeAt, shelfLifeDays()))
 
 /** 남은 일수. 0 = 오늘까지, 음수 = 만료 */
 export const daysLeft = (c: Cube, today = todayKey()) => daysBetween(today, expiresAt(c))

@@ -31,7 +31,7 @@ export function CubeSheet({ cube, onSave, onDelete, onClose }: Props) {
   // 시판은 포장의 소비기한을 꼭 받는다 (구매일보다 앞설 수 없음)
   const expiryInvalid = store && (!expiresOn || expiresOn < madeAt)
   const canSave = ingredient !== null && !madeInvalid && !expiryInvalid && (cube ? true : count > 0)
-  const expiry = ingredient && !madeInvalid ? addDays(madeAt, shelfLifeDays(ingredient)) : null
+  const expiry = ingredient && !madeInvalid ? addDays(madeAt, shelfLifeDays()) : null
 
   const stepBtn = 'flex size-11 items-center justify-center rounded-full border-[1.5px] border-line bg-card text-xl font-bold disabled:opacity-30'
 
@@ -135,7 +135,7 @@ export function CubeSheet({ cube, onSave, onDelete, onClose }: Props) {
           expiry &&
           ingredient && (
             <span className="text-xs font-medium text-muted">
-              냉동 {shelfLifeDays(ingredient)}일 보관 · {md(expiry).month}월 {md(expiry).day}일까지 드세요
+              냉동 {shelfLifeDays()}일 이내(질병관리청 안내) · {md(expiry).month}월 {md(expiry).day}일까지 드세요
             </span>
           )
         )}
@@ -146,7 +146,7 @@ export function CubeSheet({ cube, onSave, onDelete, onClose }: Props) {
           소비기한 (포장에 적힌 날짜)
           <input type="date" className={inputCls} value={expiresOn} min={madeAt} onChange={(e) => setExpiresOn(e.target.value)} />
           <span className={`text-xs font-medium ${expiryInvalid ? 'text-urgent' : 'text-muted'}`}>
-            {!expiresOn ? '포장의 소비기한을 입력해 주세요.' : expiresOn < madeAt ? '구매일보다 뒤 날짜여야 해요.' : '개봉 후 보관 방법은 포장 안내를 따라 주세요.'}
+            {!expiresOn ? '포장에 적힌 소비기한(유통기한)을 확인해 입력해 주세요.' : expiresOn < madeAt ? '구매일보다 뒤 날짜여야 해요.' : '포장의 소비기한을 다시 한번 확인해 주세요. 개봉 후 보관 방법은 포장 안내를 따라 주세요.'}
           </span>
         </label>
       )}

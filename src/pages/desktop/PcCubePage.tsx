@@ -168,16 +168,16 @@ export function PcCubePage() {
           </section>
 
           <section className="flex flex-col gap-2.5 rounded-[22px] border border-line bg-card p-[18px]">
-            <h2 className="m-0 text-[17px] font-bold">권장 보관 기간</h2>
+            <h2 className="m-0 text-[17px] font-bold">보관 기준</h2>
             <div className="flex justify-between border-b border-track py-1.5 text-sm">
-              <span>고기·생선</span>
-              <span className="font-bold">21일</span>
+              <span>직접 만든 큐브 (냉동)</span>
+              <span className="font-bold">7일</span>
             </div>
             <div className="flex justify-between border-b border-track py-1.5 text-sm">
-              <span>채소·과일·곡물</span>
-              <span className="font-bold">14일</span>
+              <span>시판 큐브</span>
+              <span className="font-bold">포장 소비기한</span>
             </div>
-            <span className="text-xs leading-normal text-sub">직접 만든 큐브 기준이에요. 시판 큐브는 포장에 적힌 소비기한을 따라요. 기한 3일 이내 큐브는 상단 알림과 대시보드에 표시돼요. 해동한 큐브는 다시 얼리지 마세요.</span>
+            <span className="text-xs leading-normal text-sub">직접 만든 큐브는 질병관리청 안내(조리한 이유식은 냉동 1주일 이내)를 따라요. 시판 큐브는 포장에 적힌 소비기한(유통기한)을 확인해 입력해 주세요. 기한 3일 이내 큐브는 상단 알림과 대시보드에 표시돼요. 해동한 큐브는 다시 얼리지 마세요.</span>
           </section>
         </div>
       </div>

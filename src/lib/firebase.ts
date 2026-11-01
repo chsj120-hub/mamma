@@ -11,6 +11,8 @@ const config = {
 }
 
 const appCheckKey = import.meta.env.VITE_FIREBASE_APPCHECK_KEY as string | undefined
+/** 'enterprise'(기본, Firebase 권장) 또는 'v3'. 키를 발급받은 종류와 맞춰야 한다 */
+const appCheckProvider = (import.meta.env.VITE_FIREBASE_APPCHECK_PROVIDER as string | undefined) === 'v3' ? 'v3' : 'enterprise'
 
 export const cloudEnabled = Boolean(config.apiKey && config.authDomain && config.projectId && config.appId)
 
@@ -24,8 +26,9 @@ function ensureApp() {
     if (appCheckKey) {
       try {
         if (import.meta.env.DEV) (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN = true
-        const { initializeAppCheck, ReCaptchaV3Provider } = await import('firebase/app-check')
-        initializeAppCheck(app, { provider: new ReCaptchaV3Provider(appCheckKey), isTokenAutoRefreshEnabled: true })
+        const { initializeAppCheck, ReCaptchaEnterpriseProvider, ReCaptchaV3Provider } = await import('firebase/app-check')
+        const provider = appCheckProvider === 'v3' ? new ReCaptchaV3Provider(appCheckKey) : new ReCaptchaEnterpriseProvider(appCheckKey)
+        initializeAppCheck(app, { provider, isTokenAutoRefreshEnabled: true })
       } catch (e) {
         console.warn('[맘마] App Check를 시작하지 못했어요', e)
         // App Check를 못 켜도 앱은 동작한다 (콘솔에서 '시행'을 켠 뒤에는 서버가 거부하므로 키 설정을 확인)

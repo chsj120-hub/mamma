@@ -59,11 +59,11 @@ export function sampleMealPlans(today = todayKey()): MealPlans {
 
 export function sampleCubes(today = todayKey()): Cube[] {
   return [
-    { id: id(), ingredient: 'beef', count: 4, madeAt: addDays(today, -19) }, // D-2
-    { id: id(), ingredient: 'broccoli', count: 3, madeAt: addDays(today, -13) }, // D-1
-    { id: id(), ingredient: 'zucchini', count: 6, madeAt: addDays(today, -4) },
-    { id: id(), ingredient: 'onion', count: 1, madeAt: addDays(today, -5) }, // 재고 부족
+    { id: id(), ingredient: 'beef', count: 4, madeAt: addDays(today, -5) }, // D-2
+    { id: id(), ingredient: 'broccoli', count: 3, madeAt: addDays(today, -6) }, // D-1
+    { id: id(), ingredient: 'zucchini', count: 6, madeAt: addDays(today, -2) },
+    { id: id(), ingredient: 'onion', count: 1, madeAt: addDays(today, -1) }, // 재고 부족
     { id: id(), ingredient: 'pear', count: 5, madeAt: addDays(today, -2) },
-    { id: id(), ingredient: 'rice', count: 8, madeAt: addDays(today, -3) },
+    { id: id(), ingredient: 'rice', count: 8, madeAt: addDays(today, -2) },
   ]
 }

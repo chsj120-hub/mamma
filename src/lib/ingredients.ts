@@ -53,8 +53,13 @@ export const INGREDIENT_IDS = Object.keys(INGREDIENTS) as IngredientId[]
  */
 export const ALLERGENS: IngredientId[] = ['yolk', 'egg', 'milk', 'wheat', 'soybean', 'peanut', 'walnut', 'almond', 'cashew', 'sesame', 'fish', 'cod', 'shrimp', 'crab']
 
-/** 냉동 큐브 권장 보관 일수: 고기·생선 21일, 나머지 14일 */
-export const shelfLifeDays = (id: IngredientId) => (INGREDIENTS[id].category === 'meat' ? 21 : 14)
+/**
+ * 직접 만든 이유식 큐브의 소진 기한(냉동 보관 일수): 7일.
+ * 출처: 질병관리청 국가건강정보포털 '식이영양(영유아)' — 조리한 이유식은 냉장 24시간 이내, 냉동 1주일 이내에 먹는 것이 좋다.
+ * (예전 값 '고기·생선 21일, 그 외 14일'은 출처를 찾을 수 없어 바꿨다. 재료 종류와 상관없이 같은 기준을 쓴다)
+ */
+export const HOMEMADE_SHELF_LIFE_DAYS = 7
+export const shelfLifeDays = () => HOMEMADE_SHELF_LIFE_DAYS
 
 export const ingredientName = (id: IngredientId) => INGREDIENTS[id].name
 

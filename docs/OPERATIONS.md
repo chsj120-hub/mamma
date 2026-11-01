@@ -29,7 +29,7 @@
 
 ## 3. App Check (P0-5)
 남의 사이트·스크립트가 내 Firebase를 마음대로 쓰지 못하게 하는 장치예요(무료).
-1. 콘솔 → App Check → 앱 등록 → **reCAPTCHA v3** → 사이트 키 발급.
+1. Google Cloud 콘솔(프로젝트 선택) → reCAPTCHA Enterprise에서 **웹(Web) 유형·점수 기반 키**를 만들어요(체크박스 챌린지는 끔). 도메인은 `example.com`처럼 **호스트 이름만**(https://·경로·포트 없이) 한 칸에 하나씩 넣어요. 그다음 Firebase 콘솔 → App Check → 웹 앱 → reCAPTCHA Enterprise에 그 키를 등록해요. (v3 키를 발급받았다면 `VITE_FIREBASE_APPCHECK_PROVIDER=v3`) 도메인은 자체 도메인을 산 뒤에 하는 게 가장 깔끔해요.
 2. `.env.local`과 Vercel 환경변수에 `VITE_FIREBASE_APPCHECK_KEY=<사이트 키>` 추가 후 다시 배포.
 3. 로컬 개발: 콘솔에 **디버그 토큰**을 등록(개발 서버를 열면 브라우저 콘솔에 토큰이 출력돼요).
 4. 앱에서 정상 동작을 확인한 뒤 콘솔에서 **Firestore '시행'**을 켜요. 키 없이 시행부터 켜면 앱이 막혀요.

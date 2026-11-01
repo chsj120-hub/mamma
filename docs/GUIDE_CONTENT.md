@@ -1,5 +1,7 @@
 # 공개 가이드(`/guide`) 만들기와 정적 HTML
 
+> 식단 예시·경험담·재료별 후기처럼 **직접 쓰는 글**은 `docs/GUIDE_WRITING.md`와 `docs/guide-templates/`를 보세요.
+
 ## 글 하나 추가하는 법
 1. `src/content/guide/새글주소.json` 파일을 만들어요(주소는 영문 소문자·하이픈). 기존 파일을 복사해 고치면 돼요.
 2. 필드: `slug`(파일 이름과 같게), `title`, `description`(검색 결과에 보이는 한두 문장), `category`, `order`(작을수록 앞), `updated`(마지막 확인일), `draft`, `sections`(소제목 `h` + 문단 `p` 또는 목록 `ul`), `sources`(출처 `label`·`url`), `faq`(선택).

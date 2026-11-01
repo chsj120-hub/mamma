@@ -341,10 +341,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!family || !u) return familyOff
       const r = await family.join(u.uid, u.displayName, code)
       if (!r.ok) return r
+      // 초대 링크로 새로 가입한 사람은 아기 정보를 따로 적지 않으므로, 여기서 가입 완료로 표시한다
+      if (!onboarded) await authService.completeOnboarding(u.uid).catch(() => {})
       await activate({ ...u, dataUid: r.ownerUid }, true, false, true, true)
       return { ok: true }
     },
-    [family, activate],
+    [family, activate, onboarded],
   )
 
   const leaveFamily = useCallback(async (): Promise<FamilyResult> => {
