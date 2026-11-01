@@ -14,11 +14,13 @@ type Props = {
   targetMl: number
   onEatenChange: (ml: number | undefined) => void
   onTasteChange: (taste: Taste | undefined) => void
+  /** 완료한 사람 이름을 보여 줄지 (가족 공유 중일 때) */
+  showDoneBy?: boolean
 }
 
 const ML_STEP = 10
 
-export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange, onTasteChange }: Props) {
+export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange, onTasteChange, showDoneBy }: Props) {
   const done = meal.status === 'done'
   return (
     <article
@@ -30,6 +32,7 @@ export function MealCard({ meal, allergenDay, onToggle, targetMl, onEatenChange,
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-xs font-semibold text-muted">
             {koreanTime(meal.time)} · {meal.label}
+            {done && showDoneBy && meal.doneBy && ` · ${meal.doneBy}님이 먹였어요`}
           </span>
           <span className="text-base font-bold">{mealTitle(meal)}</span>
         </div>

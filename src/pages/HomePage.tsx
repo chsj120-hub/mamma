@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AppHeader, NotificationButton } from '../components/AppHeader'
 import { AllergenNotice } from '../components/AllergenNotice'
+import { MealsPerDayNotice } from '../components/MealsPerDayNotice'
 import { StageNotice } from '../components/StageNotice'
 import { ExpiryAlert } from '../components/home/ExpiryAlert'
 import { MealCard } from '../components/home/MealCard'
@@ -13,7 +14,7 @@ import { todayKey } from '../lib/date'
 import { allergenTestProgress, ironDaysThisWeek } from '../lib/meal'
 
 export function HomePage() {
-  const { profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste } = useAppData()
+  const { profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste, showDoneBy } = useAppData()
   const [editing, setEditing] = useState(false)
 
   const today = todayKey()
@@ -28,6 +29,7 @@ export function HomePage() {
       <main className="flex flex-col gap-4 px-5 pt-1">
         <ProfileCard profile={profile} onEdit={() => setEditing(true)} />
         <StageNotice />
+        <MealsPerDayNotice />
         <ExpiryAlert cubes={expiring} />
         <AllergenNotice how="식단 탭에서 날짜를 눌러 '알레르기 테스트' 칸에 넣을 수 있어요." />
 
@@ -56,6 +58,7 @@ export function HomePage() {
                 targetMl={profile.targetMl}
                 onEatenChange={(ml) => setEatenMl(today, m.id, ml)}
                 onTasteChange={(t) => setTaste(today, m.id, t)}
+                showDoneBy={showDoneBy}
               />
             ))
           )}

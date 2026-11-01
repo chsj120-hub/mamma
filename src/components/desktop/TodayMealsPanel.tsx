@@ -8,10 +8,11 @@ type Props = {
   meals: Meal[]
   onToggle: (mealId: string) => void
   onTaste: (mealId: string, taste: Taste | undefined) => void
+  showDoneBy?: boolean
 }
 
 /** PC 오른쪽 '오늘의 식단' (한 줄 요약 + 완료 토글) */
-export function TodayMealsPanel({ meals, onToggle, onTaste }: Props) {
+export function TodayMealsPanel({ meals, onToggle, onTaste, showDoneBy }: Props) {
   const sorted = sortMeals(meals)
   const doneCount = sorted.filter((m) => m.status === 'done').length
 
@@ -35,6 +36,7 @@ export function TodayMealsPanel({ meals, onToggle, onTaste }: Props) {
               <span className="text-xs text-muted">
                 {koreanTime(m.time)} · {m.label}
                 {done && m.eatenMl != null && ` · ${m.eatenMl}ml 먹음`}
+                {done && showDoneBy && m.doneBy && ` · ${m.doneBy}님`}
               </span>
               <span className="text-sm font-bold">{mealTitle(m)}</span>
               <span className="truncate text-xs text-sub">

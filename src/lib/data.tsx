@@ -1,4 +1,5 @@
 // 앱 데이터(아기 프로필·식단·홈큐브) 상태. 화면은 useAppData()로만 읽고 쓴다.
+import { useAuth } from '../auth/AuthProvider'
 import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from 'react'
 import { newId } from './meal'
 import { useStoredState } from './storage'
@@ -17,6 +18,8 @@ type AppData = {
   plans: MealPlans
   cubes: Cube[]
   toggleMealDone: (date: string, mealId: string) => void
+  /** '누가 먹였는지'를 화면에 보여 줄지: 가족 기록을 함께 쓰거나, 다른 사람이 완료한 끼니가 있을 때만 */
+  showDoneBy: boolean
   /** 끼니 반응 한 줄 기록 (스냅샷 없이 바로 저장) */
   setTaste: (date: string, mealId: string, taste: Taste | undefined) => void
   /** 먹은 양 기록 (스냅샷 없이 바로 저장) */
@@ -46,7 +49,12 @@ type AppData = {
 
 const Ctx = createContext<AppData | null>(null)
 
+/** 완료한 사람으로 남길 짧은 표시 이름 (구글 계정 이름 앞 10자) */
+export const shortName = (name?: string | null) => (name?.trim().slice(0, 10) || '가족')
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
+  const { user, inFamily } = useAuth()
+  const myName = shortName(user?.displayName)
   const [profile, setProfile] = useStoredState<BabyProfile>('profile', SAMPLE_PROFILE)
   const [plans, setPlans] = useStoredState<MealPlans>('mealPlans', () => (SEED_SAMPLE_DATA ? sampleMealPlans() : {}))
   const [cubes, setCubes] = useStoredState<Cube[]>('cubes', () => (SEED_SAMPLE_DATA ? sampleCubes() : []))
@@ -64,12 +72,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setPlans((prev) => {
         const day = prev[date]
         if (!day) return prev
-        const meals = day.meals.map((m) =>
-          m.id === mealId ? { ...m, status: m.status === 'done' ? ('planned' as const) : ('done' as const) } : m,
-        )
+        const meals = day.meals.map((m) => {
+          if (m.id !== mealId) return m
+          // 완료로 바꿀 때 누른 사람을 남기고, 예정으로 되돌리면 지운다
+          return m.status === 'done' ? { ...m, status: 'planned' as const, doneBy: undefined } : { ...m, status: 'done' as const, doneBy: myName }
+        })
         return { ...prev, [date]: { ...day, meals } }
       }),
-    [setPlans],
+    [setPlans, myName],
   )
 
   const setEatenMl = useCallback(
@@ -126,7 +136,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           ...day,
           meals: day.meals.map((m) => {
             const now = records.get(m.id)
-            return now ? { ...m, status: now.status, eatenMl: now.eatenMl, taste: now.taste } : m
+            return now ? { ...m, status: now.status, eatenMl: now.eatenMl, taste: now.taste, doneBy: now.doneBy } : m
           }),
         }
       }
@@ -171,8 +181,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [setMilestones],
   )
 
+  const showDoneBy = inFamily || Object.values(plans).some((d) => d.meals.some((m) => m.doneBy && m.doneBy !== myName))
+
   const value = useMemo(
     () => ({
+      showDoneBy,
       profile,
       setProfile,
       plans,
@@ -194,7 +207,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       saveGrowth,
       removeGrowth,
     }),
-    [profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste, commitPlans, snapshots, restoreSnapshot, addCube, updateCube, removeCube, reactions, toggleReaction, milestones, toggleMilestone, growth, saveGrowth, removeGrowth],
+    [showDoneBy, profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste, commitPlans, snapshots, restoreSnapshot, addCube, updateCube, removeCube, reactions, toggleReaction, milestones, toggleMilestone, growth, saveGrowth, removeGrowth],
   )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

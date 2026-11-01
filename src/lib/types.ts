@@ -47,6 +47,8 @@ export type Meal = {
   eatenMl?: number
   /** 먹은 반응 한 줄 */
   taste?: Taste
+  /** 완료를 누른 사람의 표시 이름 (가족 공유로 여럿이 쓸 때 '누가 먹였는지' 보여 주려고) */
+  doneBy?: string
 }
 
 export type MealPlanDay = {

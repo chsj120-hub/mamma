@@ -6,6 +6,7 @@ import { PcCalendar, PcCalendarLegend } from '../../components/desktop/PcCalenda
 import { TodayMealsPanel } from '../../components/desktop/TodayMealsPanel'
 import { AllergenNotice } from '../../components/AllergenNotice'
 import { ShareWeekButton } from '../../components/ShareWeekButton'
+import { MealsPerDayNotice } from '../../components/MealsPerDayNotice'
 import { StageNotice } from '../../components/StageNotice'
 import { ExpiryAlert } from '../../components/home/ExpiryAlert'
 import { NutritionCard } from '../../components/home/NutritionCard'
@@ -31,7 +32,7 @@ const icon = (children: ReactNode) => (
 
 /** PC 대시보드 (/): 상단 동작 버튼, 기한 임박 배너, 월간·주간 캘린더 + 오른쪽 오늘 요약 */
 export function DashboardPage() {
-  const { profile, plans, cubes, commitPlans, snapshots, restoreSnapshot, toggleMealDone, setTaste } = useAppData()
+  const { profile, plans, cubes, commitPlans, snapshots, restoreSnapshot, toggleMealDone, setTaste, showDoneBy } = useAppData()
   const actions = usePlanActions()
   const today = todayKey()
   const [view, setView] = useStoredState<PlannerView>('pcCalendarView', 'month')
@@ -175,7 +176,8 @@ export function DashboardPage() {
 
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-5">
           <StageNotice />
-          <TodayMealsPanel meals={plans[today]?.meals ?? []} onToggle={(id) => toggleMealDone(today, id)} onTaste={(id, t) => setTaste(today, id, t)} />
+          <MealsPerDayNotice />
+          <TodayMealsPanel meals={plans[today]?.meals ?? []} onToggle={(id) => toggleMealDone(today, id)} onTaste={(id, t) => setTaste(today, id, t)} showDoneBy={showDoneBy} />
           <AllergenNotice how="캘린더에서 날짜를 눌러 '알레르기 테스트' 칸에 넣을 수 있어요." />
           <CubeAttentionPanel cubes={cubes} today={today} />
           <NutritionCard
