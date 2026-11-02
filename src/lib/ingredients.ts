@@ -5,15 +5,25 @@ export const INGREDIENTS = {
   // 곡물
   rice: { name: '쌀', category: 'grain' },
   wheat: { name: '밀', category: 'grain' },
+  buckwheat: { name: '메밀', category: 'grain' },
   // 고기·생선·해산물
   beef: { name: '소고기', category: 'meat' },
   chicken: { name: '닭고기', category: 'meat' },
+  pork: { name: '돼지고기', category: 'meat' },
   cod: { name: '대구살', category: 'meat' },
   fish: { name: '생선', category: 'meat' },
   shrimp: { name: '새우', category: 'meat' },
   crab: { name: '게', category: 'meat' },
+  clam: { name: '조개', category: 'meat' },
   // 채소
+  cabbage: { name: '양배추', category: 'veggie' },
+  napacabbage: { name: '배추', category: 'veggie' },
   zucchini: { name: '애호박', category: 'veggie' },
+  paprika: { name: '파프리카', category: 'veggie' },
+  eggplant: { name: '가지', category: 'veggie' },
+  cucumber: { name: '오이', category: 'veggie' },
+  vitaminchae: { name: '비타민채', category: 'veggie' },
+  mushroom: { name: '양송이버섯', category: 'veggie' },
   onion: { name: '양파', category: 'veggie' },
   broccoli: { name: '브로콜리', category: 'veggie' },
   pumpkin: { name: '단호박', category: 'veggie' },
@@ -31,6 +41,8 @@ export const INGREDIENTS = {
   apple: { name: '사과', category: 'fruit' },
   banana: { name: '바나나', category: 'fruit' },
   avocado: { name: '아보카도', category: 'fruit' },
+  kiwi: { name: '키위', category: 'fruit' },
+  peach: { name: '복숭아', category: 'fruit' },
   // 달걀·유제품·콩·견과·씨앗
   yolk: { name: '계란노른자', category: 'etc' },
   egg: { name: '계란', category: 'etc' },
@@ -48,10 +60,10 @@ export const INGREDIENT_IDS = Object.keys(INGREDIENTS) as IngredientId[]
 
 /**
  * 3일 테스트가 필요한 알레르기 유발 재료 (알레르기 테스트 칸에서 고를 수 있고, 리포트에 '주의'로 표시).
- * 달걀, 우유(요거트 포함), 밀, 대두, 땅콩, 견과류, 참깨, 생선, 갑각류.
+ * 달걀, 우유(요거트 포함), 밀, 메밀, 대두, 땅콩, 견과류, 참깨, 생선, 조개, 갑각류.
  * 자동 채우기는 이 재료를 새로 시작하지 않고, 대신 '시작할 시기' 안내를 띄운다 (lib/allergenNotice.ts).
  */
-export const ALLERGENS: IngredientId[] = ['yolk', 'egg', 'milk', 'wheat', 'soybean', 'peanut', 'walnut', 'almond', 'cashew', 'sesame', 'fish', 'cod', 'shrimp', 'crab']
+export const ALLERGENS: IngredientId[] = ['yolk', 'egg', 'milk', 'wheat', 'buckwheat', 'soybean', 'peanut', 'walnut', 'almond', 'cashew', 'sesame', 'fish', 'cod', 'clam', 'shrimp', 'crab']
 
 /**
  * 직접 만든 이유식 큐브의 소진 기한(냉동 보관 일수): 7일.

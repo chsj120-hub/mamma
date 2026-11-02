@@ -10,9 +10,14 @@
 // 소프트 규칙
 // - 소고기(철분)는 거의 매일. 이틀 연속이었으면 다른 통과한 단백질로 쉬어 간다
 // - 전날 먹은 채소는 피한다(다양성), 과일은 마지막 끼니에
+// - 하루 3끼 이상(후기~)이면 끼니마다 단백질을 번갈아 쓴다(소고기·닭고기·두부 등). 후기부터 달걀·두부는 3일 테스트를 통과하면 단백질로도 쓴다
+// - 생선은 일주일에 자주 넣지 않는다 (FISH_MAX_DAYS_PER_WEEK)
+// - 식품 궁합표의 '안 좋은 궁합'(data/foodPairs.ts)은 같은 끼니에서 겹치지 않게 피한다
 // - 끼니 반응(taste)을 기록했다면, 잘 먹음보다 거부가 2번 이상 많은 채소·과일은 순서를 뒤로 미룬다
 //   (빼지는 않는다: 새 음식은 8~10번 다시 시도해 보라는 안내와 맞추기 위해 덜 자주 넣을 뿐이다)
 import { INGREDIENT_INTRO } from '../data/ingredientIntro'
+import { SHEET_ALLERGEN_ORDER } from '../data/allergenKits'
+import { clashes } from '../data/foodPairs'
 import { NEW_FOOD_TEST_DAYS, STAGE_RULES } from '../data/stageGuide'
 import { addDays, daysBetween } from './date'
 import { ALLERGENS, INGREDIENT_IDS, INGREDIENTS, ingredientName, type IngredientId } from './ingredients'
@@ -21,6 +26,12 @@ import { STAGE_IDS } from './stage'
 import type { BabyProfile, Meal, MealPlans, StageId } from './types'
 
 const BASE: IngredientId = 'rice'
+
+/** 생선(대구살·생선)을 넣는 날을 최근 7일 안에 이 횟수까지만. 출처: 사용자 식단표 '생선은 주 2회 미만으로' (소아과 확인 전) */
+const FISH_MAX_DAYS_PER_WEEK = 1
+const FISH: IngredientId[] = ['cod', 'fish']
+/** 3일 테스트를 통과하면 고기 칸에 단백질로 쓸 수 있는 달걀·콩(두부) */
+const EXTRA_PROTEINS: IngredientId[] = ['egg', 'soybean']
 
 /** 그날 식단에 들어간 재료 (알레르기 테스트 칸 포함) */
 function dayIngredients(plans: MealPlans, date: string) {
@@ -69,6 +80,27 @@ export function tasteScores(plans: MealPlans, date: string) {
     }
   }
   return score
+}
+
+/**
+ * 알레르기 재료 테스트를 시작해도 되는지. 초기에는 쌀·소고기·채소·과일을 먼저 3일 테스트로 익힌 뒤에 한다.
+ * 출처: 사용자 식단표 '알러지테스트는 쌀 → 소고기 → 채소 → 과일까지 테스트 한 후에 하는 것이 좋음'. 중기 이후는 이미 익숙해졌다고 본다
+ */
+export function readyForAllergens(stage: StageId, passed: Set<IngredientId>) {
+  if (stage !== 'early') return true
+  const has = (cat: 'veggie' | 'fruit') => [...passed].some((id) => INGREDIENTS[id].category === cat)
+  return passed.has('rice') && passed.has('beef') && has('veggie') && has('fruit')
+}
+
+/**
+ * 알레르기 테스트로 권할 재료 (순서대로). 노른자는 달걀로 대신해 뺀다.
+ * kit가 켜져 있으면 식단표의 알레르기 순서로 줄을 세운다(단계는 그대로: 새우·게·견과류는 후기부터).
+ */
+export function allergenPool(stage: StageId, passed: Set<IngredientId>, reactions: IngredientId[], kit = false) {
+  const normal = upcomingIngredients(stage, passed, reactions).filter((id) => ALLERGENS.includes(id) && id !== 'yolk')
+  if (!kit) return normal
+  const ranked = SHEET_ALLERGEN_ORDER.filter((id) => normal.includes(id))
+  return [...ranked, ...normal.filter((id) => !ranked.includes(id))]
 }
 
 /** 지금 단계까지 열린 재료 중 아직 통과 못 한 재료들 (단계 → 순서) */
@@ -121,7 +153,11 @@ function buildDay(plans: MealPlans, date: string, profile: BabyProfile, reaction
   const yesterday = dayIngredients(plans, addDays(date, -1))
   const beefStreak = [1, 2].filter((k) => plans[addDays(date, -k)]?.meals.some((m) => m.meat === 'beef')).length
   // 3일 테스트를 통과한 단백질만 (알레르기 재료라도 통과했으면 사용)
-  const proteins = INGREDIENT_IDS.filter((id) => INGREDIENTS[id].category === 'meat' && known(id))
+  const fishDaysThisWeek = Array.from({ length: 7 }, (_, k) => plans[addDays(date, -(k + 1))]?.meals.some((m) => m.meat && FISH.includes(m.meat))).filter(Boolean).length
+  const fishOk = fishDaysThisWeek < FISH_MAX_DAYS_PER_WEEK
+  // 달걀·두부는 후기부터 단백질로 쓴다 (초기·중기에는 철분을 위해 소고기 중심: 사용자 식단표)
+  const extras = profile.stage === 'late' || profile.stage === 'complete' ? EXTRA_PROTEINS : []
+  const proteins = [...INGREDIENT_IDS.filter((id) => INGREDIENTS[id].category === 'meat'), ...extras].filter((id) => known(id) && (fishOk || !FISH.includes(id)))
   const altProteins = firstPrefer(proteins.filter((id) => id !== 'beef'))
   const preferredMeat = variant.prefer.find((id) => proteins.includes(id))
   const meat: IngredientId | undefined =
@@ -141,6 +177,9 @@ function buildDay(plans: MealPlans, date: string, profile: BabyProfile, reaction
   const startAt = variant.prefer.length ? 0 : n * 3 // 먼저 쓸 재료가 있으면 그 재료부터, 아니면 날짜·변형에 따라 돌려 고른다
 
   const template = mealSlots(profile)
+  // 후기부터는 끼니마다 단백질을 번갈아 쓴다 (1번째 끼니가 하루 단백질, 가운데 끼니는 다른 단백질)
+  const rotateProtein = (profile.stage === 'late' || profile.stage === 'complete') && altProteins.length > 0
+  const mealMeat = (i: number) => (meat && rotateProtein && i % 2 === 1 ? altProteins[(n + i) % altProteins.length] : meat)
   const meals: Meal[] = template.map((t, i) => {
     const meal: Meal = { id: newId(), ...t, status: 'planned' }
     if (known(BASE) || fresh === BASE) meal.base = BASE
@@ -148,12 +187,13 @@ function buildDay(plans: MealPlans, date: string, profile: BabyProfile, reaction
     if (i === 0 && fresh && fresh !== BASE) place(meal, fresh)
     const last = i === template.length - 1
     const room = () => rule.itemsPerMeal - countItems(meal)
-    if (meat && room() > 0 && !meal.meat) meal.meat = meat
+    const protein = mealMeat(i)
+    if (protein && room() > 0 && !meal.meat) meal.meat = protein
     // 채소는 두 칸까지. 마지막 끼니는 채소와 과일이 둘 다 들어갈 자리가 있을 때만 과일 자리를 남긴다
     const wantFruit = last && fruits.length > 0 && !meal.fruit && (vegs.length === 0 || room() >= 2)
     for (let k = 0; k < vegs.length && !meal.veggie2 && room() > (wantFruit ? 1 : 0); k++) {
       const v = vegs[(startAt + i * 2 + k) % vegs.length]
-      if (v !== meal.veggie1) place(meal, v)
+      if (v !== meal.veggie1 && ![meal.meat, meal.veggie1, meal.snack].some((o) => o && clashes(o, v))) place(meal, v)
     }
     if (wantFruit && room() > 0) meal.fruit = fruits[(variant.prefer.length ? 0 : n) % fruits.length]
     return meal

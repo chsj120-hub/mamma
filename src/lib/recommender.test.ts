@@ -6,7 +6,10 @@ import { addDays, weekStart } from './date'
 import { ALLERGENS, type IngredientId } from './ingredients'
 import { mealItems } from './meal'
 import { allergenCandidates, planAllergenWeeks } from './allergenPlan'
-import { fillEmptyDays, suggestDayMenus } from './recommender'
+import { fillEmptyDays, ingredientProgress, readyForAllergens, suggestDayMenus } from './recommender'
+import { clashes } from '../data/foodPairs'
+import { KIT_INGREDIENTS } from '../data/allergenKits'
+import { INGREDIENT_INTRO } from '../data/ingredientIntro'
 import type { BabyProfile, MealPlans, StageId } from './types'
 
 const START = '2026-11-02' // 월요일
@@ -107,5 +110,87 @@ describe('알레르기 테스트 주간 추천', () => {
     expect(rows[0].dates[0] >= wed).toBe(true)
     const withTest: MealPlans = { [START]: { date: START, meals: [{ id: 'x', time: '10:00', label: '오전', status: 'planned', allergen: 'egg' as IngredientId }] } }
     expect(planAllergenWeeks(withTest, p, [], START, [START]).rows[0].blocked).toBe('busy')
+  })
+})
+
+describe('식단표 반영 규칙 (초기 순서·알레르기 시작 조건·단백질·궁합)', () => {
+  const meal = (id: string, items: Partial<Record<'allergen' | 'meat' | 'veggie1', IngredientId>>) => ({ id, time: '10:00', label: '아침', status: 'planned' as const, ...items })
+  const day = (offset: number, items: Partial<Record<'allergen' | 'meat' | 'veggie1', IngredientId>>): [string, MealPlans[string]] => {
+    const d = addDays(START, offset)
+    return [d, { date: d, meals: [meal(`m${offset}`, items)] }]
+  }
+
+  it('초기 순서: 쌀 → 소고기 → 이파리채소 → 노란채소 → 과일', () => {
+    const early = fillEmptyDays({}, dates, profile('early')).plans
+    const first = [...firstSeen(early)].sort((a, b) => (a[1] < b[1] ? -1 : 1)).map(([id]) => id)
+    expect(first.slice(0, 5)).toEqual(['rice', 'beef', 'cabbage', 'pumpkin', 'apple'])
+  })
+
+  it('초기에는 쌀·소고기·채소·과일을 익히기 전에는 알레르기 테스트를 권하지 않는다', () => {
+    expect(allergenCandidates({}, profile('early'), [])).toEqual([])
+    expect(readyForAllergens('early', new Set<IngredientId>(['rice', 'beef', 'cabbage']))).toBe(false)
+    expect(readyForAllergens('early', new Set<IngredientId>(['rice', 'beef', 'cabbage', 'apple']))).toBe(true)
+    expect(readyForAllergens('middle', new Set())).toBe(true)
+  })
+
+  it('다 익힌 뒤에는 밀 → 땅콩 → 달걀 순으로 권하고, 노른자는 따로 권하지 않는다', () => {
+    // 쌀 → 소고기 → 양배추 → 사과를 3일씩 먹은 기록 (쌀은 계속 베이스)
+    const plans: MealPlans = {}
+    ;(['rice', 'beef', 'cabbage', 'apple'] as IngredientId[]).forEach((id, i) =>
+      [0, 1, 2].forEach((k) => {
+        const d = addDays(START, -12 + i * 3 + k)
+        plans[d] = { date: d, meals: [{ id: `p${i}${k}`, time: '10:00', label: '아침', status: 'done', base: 'rice', ...(id === 'beef' ? { meat: id } : id === 'cabbage' ? { veggie1: id } : id === 'apple' ? { fruit: id } : {}) }] }
+      }),
+    )
+    const cands = allergenCandidates(plans, profile('early'), [])
+    expect(cands.slice(0, 3)).toEqual(['wheat', 'peanut', 'egg'])
+    expect(cands).not.toContain('yolk')
+  })
+
+  it('달걀·두부는 후기 전에는 단백질로 쓰지 않는다', () => {
+    const plans: MealPlans = Object.fromEntries([0, 1, 2].map((k) => day(-3 + k, { allergen: 'egg' })))
+    const out = fillEmptyDays(plans, dates.slice(0, 14), profile('middle')).plans
+    for (const d of dates.slice(0, 14)) for (const m of out[d].meals) expect(m.meat, d).not.toBe('egg')
+    expect(ingredientProgress(plans, START).passed.has('egg')).toBe(true)
+  })
+
+  it('생선은 최근 7일 안에 한 번만 넣는다', () => {
+    const seed: MealPlans = {}
+    for (const id of ['cod', 'chicken', 'beef'] as IngredientId[]) for (let k = 0; k < 3; k++) { const [d, v] = day(-30 + [...['cod', 'chicken', 'beef']].indexOf(id) * 3 + k, { meat: id }); seed[d] = v }
+    const out = fillEmptyDays(seed, dates, profile('middle')).plans
+    for (let i = 0; i < DAYS; i++) {
+      const window = Array.from({ length: 7 }, (_, k) => out[addDays(START, i - k)]).filter(Boolean)
+      const fishDays = window.filter((p) => p.meals.some((m) => m.meat === 'cod' || m.meat === 'fish')).length
+      expect(fishDays, addDays(START, i)).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('궁합이 안 좋은 짝은 새 재료가 아니면 한 끼에 같이 넣지 않는다', () => {
+    const mid = fillEmptyDays({}, dates, profile('middle')).plans
+    const first = firstSeen(mid)
+    for (const d of dates) for (const m of mid[d].meals) {
+      const items = mealItems(m).filter((id) => first.get(id) !== d)
+      for (let a = 0; a < items.length; a++) for (let b = a + 1; b < items.length; b++) expect(clashes(items[a], items[b]), `${d} ${items[a]}+${items[b]}`).toBe(false)
+    }
+  })
+
+  it('새우·게·견과류는 9개월(후기)부터 후보에 뜨고, 고를 때 질병관리청 안내가 설명에 붙는다', () => {
+    const shellNut: IngredientId[] = ['shrimp', 'crab', 'walnut', 'almond', 'cashew']
+    for (const stage of ['early', 'middle'] as StageId[]) for (const id of shellNut) expect(allergenCandidates({}, profile(stage), []), `${stage} ${id}`).not.toContain(id)
+    for (const id of shellNut) {
+      expect(allergenCandidates({}, profile('late'), []), id).toContain(id)
+      expect(INGREDIENT_INTRO[id].note, id).toContain('질병관리청')
+    }
+  })
+
+  it('키트를 켜도 단계는 그대로이고, 식단표 순서로 줄을 세우며 반응 재료는 빠진다', () => {
+    const p: BabyProfile = { ...profile('late'), allergenKit: true }
+    const on = allergenCandidates({}, p, [])
+    for (const id of KIT_INGREDIENTS) expect(on, id).toContain(id)
+    expect(on.indexOf('wheat')).toBeLessThan(on.indexOf('shrimp'))
+    expect(on.indexOf('shrimp')).toBeLessThan(on.indexOf('crab'))
+    expect(allergenCandidates({}, p, ['shrimp'])).not.toContain('shrimp')
+    const mid = allergenCandidates({}, { ...profile('middle'), allergenKit: true }, [])
+    for (const id of ['shrimp', 'crab', 'walnut'] as IngredientId[]) expect(mid, id).not.toContain(id)
   })
 })

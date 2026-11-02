@@ -4,9 +4,9 @@
 // - 한 주에 한 가지만, 그날 첫 끼(오전)에 넣어 낮 동안 반응을 볼 수 있게 한다
 // - 자동으로 확정하지 않는다: 화면에서 부모가 고르고 확인한 것만 넣는다 (AiFillSheet)
 import { addDays, weekStart } from './date'
-import { ALLERGENS, type IngredientId } from './ingredients'
+import type { IngredientId } from './ingredients'
 import { mealSlots, sortMeals } from './meal'
-import { ingredientProgress, upcomingIngredients } from './recommender'
+import { allergenPool, ingredientProgress, readyForAllergens } from './recommender'
 import type { BabyProfile, MealPlans } from './types'
 
 /** 3일 연속 테스트 */
@@ -20,7 +20,9 @@ export function allergenCandidates(plans: MealPlans, profile: BabyProfile, react
   const { passed } = ingredientProgress(plans, '2100-01-01')
   const scheduled = new Set<IngredientId>()
   for (const day of Object.values(plans)) for (const m of day.meals) if (m.allergen) scheduled.add(m.allergen)
-  return upcomingIngredients(profile.stage, passed, reactions).filter((id) => ALLERGENS.includes(id) && !scheduled.has(id))
+  if (!readyForAllergens(profile.stage, passed)) return []
+  // 노른자는 달걀(노른자·흰자 같이)로 대신한다. 노른자만 먼저 하고 싶으면 칸에서 직접 고른다. 키트를 쓰면 키트 재료도 후보에 든다
+  return allergenPool(profile.stage, passed, reactions, profile.allergenKit).filter((id) => !scheduled.has(id))
 }
 
 export type AllergenWeekRow = {

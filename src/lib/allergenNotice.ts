@@ -1,7 +1,7 @@
 // '알레르기 재료를 시작할 시기예요' 안내. 자동 채우기가 알레르기 재료를 넣지 않는 대신 부모에게 권한다.
 import { addDays } from './date'
 import { ALLERGENS, type IngredientId } from './ingredients'
-import { ingredientProgress, upcomingIngredients } from './recommender'
+import { allergenPool, ingredientProgress, readyForAllergens } from './recommender'
 import type { BabyProfile, MealPlans } from './types'
 
 /** 안내를 보여 주기 전에 먼저 익숙해져야 하는 일반 재료 수 */
@@ -22,6 +22,7 @@ export function allergenSuggestion(plans: MealPlans, profile: BabyProfile, today
 
   for (let i = 0; i <= LOOKAHEAD_DAYS; i++) if (plans[addDays(today, i)]?.meals.some((m) => m.allergen)) return null
 
-  const next = upcomingIngredients(profile.stage, passed, reactions).filter((id) => ALLERGENS.includes(id))
+  if (!readyForAllergens(profile.stage, passed)) return null
+  const next = allergenPool(profile.stage, passed, reactions, profile.allergenKit)
   return next.length ? next.slice(0, SUGGEST_COUNT) : null
 }

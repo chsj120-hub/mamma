@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { inKit, KIT_NAME } from '../../data/allergenKits'
 import { INGREDIENT_INTRO } from '../../data/ingredientIntro'
 import { allergenByDate, planAllergenWeeks, weeksCovering } from '../../lib/allergenPlan'
 import { useAppData } from '../../lib/data'
@@ -24,7 +25,7 @@ const fmt = (d: string) => `${md(d).month}/${md(d).day}(${DOW_KO[dowOf(d)]})`
  * ① 빈 날은 월령에 맞는 메뉴로 채운다  ② 알레르기 테스트는 주마다 추천 재료를 보여 주고, 부모가 고르거나 넣지 않는다
  */
 export function AiFillSheet({ dates, today, onClose, onDone }: Props) {
-  const { plans, profile, reactions } = useAppData()
+  const { plans, profile, setProfile, reactions } = useAppData()
   const actions = usePlanActions()
 
   const emptyDays = dates.filter((d) => d >= today && !plans[d]?.meals.length).length
@@ -35,6 +36,15 @@ export function AiFillSheet({ dates, today, onClose, onDone }: Props) {
   const [picks, setPicks] = useState<Record<string, IngredientId | ''>>(() => Object.fromEntries(rows.map((r) => [r.weekStart, r.suggestion ?? ''])))
   const chosen = allergenByDate(rows, picks)
   const pickCount = new Set(Object.values(picks).filter(Boolean)).size
+
+  const kit = Boolean(profile.allergenKit)
+  /** 키트 사용 여부를 바꾸면 후보와 추천이 달라지므로 추천 재료를 다시 채워 둔다 */
+  const toggleKit = (on: boolean) => {
+    const next = { ...profile, allergenKit: on }
+    setProfile(next)
+    const again = planAllergenWeeks(plans, next, reactions, today, weeksCovering(dates)).rows
+    setPicks(Object.fromEntries(again.map((r) => [r.weekStart, r.suggestion ?? ''])))
+  }
 
   const run = () => {
     onDone(actions.fill(dates, today, chosen))
@@ -75,6 +85,18 @@ export function AiFillSheet({ dates, today, onClose, onDone }: Props) {
           </p>
         </div>
 
+        <div className="flex flex-col gap-1.5 rounded-xl bg-card p-3">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[13px] font-semibold">
+            <input type="checkbox" checked={kit} onChange={(e) => toggleKit(e.target.checked)} className="m-0 size-5 accent-ink" />
+            시판 알레르기 키트를 같이 써요 ({KIT_NAME} 기준)
+          </label>
+          <p className="m-0 text-xs leading-relaxed text-sub">
+            {kit
+              ? '키트에 있는 재료(밀·땅콩·대두·메밀·참깨·새우·조개·흰살생선·호두·게)를 식단표 순서대로 추천해요. 새우·게·호두는 9개월부터 나와요. 키트의 흰살생선은 앱에서 "대구살"로 기록해요. 달걀·우유(요거트)는 키트에 없으니 직접 준비해 주세요. 키트 구성은 바뀔 수 있어 포장의 원재료 표시를 꼭 확인해 주세요.'
+              : '키트를 사서 쓴다면 체크해 주세요. 키트에 들어 있는 재료를 순서에 맞춰 추천하고, 키트에 없는 재료(달걀·우유 등)는 직접 준비하라고 알려 드려요.'}
+          </p>
+        </div>
+
         {candidates.length === 0 ? (
           <p className="m-0 rounded-xl bg-card p-3 text-center text-[13px] text-sub">지금 단계에서 새로 추천할 알레르기 재료가 없어요. (이미 확인했거나 아직 시작하기 이른 재료예요)</p>
         ) : shown.length === 0 ? (
@@ -108,6 +130,7 @@ export function AiFillSheet({ dates, today, onClose, onDone }: Props) {
                             <option key={c} value={c}>
                               {ingredientName(c)}
                               {c === r.suggestion ? ' (추천)' : ''}
+                              {kit ? (inKit(c) ? ' · 키트' : ' · 직접 준비') : ''}
                             </option>
                           ))}
                         </select>

@@ -36,3 +36,15 @@
 | icons/walnut.svg | 호두 | 신규 |
 | icons/almond.svg | 아몬드 | 신규 |
 | icons/cashew.svg | 캐슈너트 | 신규 |
+| icons/cabbage.svg | 양배추 | 신규 (식단표 반영, 2026-11) |
+| icons/napacabbage.svg | 배추 | 신규 (식단표 반영, 2026-11) |
+| icons/paprika.svg | 파프리카 | 신규 (식단표 반영, 2026-11) |
+| icons/eggplant.svg | 가지 | 신규 (식단표 반영, 2026-11) |
+| icons/cucumber.svg | 오이 | 신규 (식단표 반영, 2026-11) |
+| icons/vitaminchae.svg | 비타민채 | 신규 (식단표 반영, 2026-11) |
+| icons/mushroom.svg | 양송이버섯 | 신규 (식단표 반영, 2026-11) |
+| icons/pork.svg | 돼지고기 | 신규 (식단표 반영, 2026-11) |
+| icons/kiwi.svg | 키위 | 신규 (식단표 반영, 2026-11) |
+| icons/peach.svg | 복숭아 | 신규 (식단표 반영, 2026-11) |
+| icons/buckwheat.svg | 메밀 | 신규 (식단표 반영, 2026-11) |
+| icons/clam.svg | 조개 | 신규 (식단표 반영, 2026-11) |

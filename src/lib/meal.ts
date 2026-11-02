@@ -18,8 +18,12 @@ export const SLOTS: { key: SlotKey; label: string; categories: IngredientCategor
 export function slotOptions(categories: IngredientCategory[] | 'allergen'): IngredientId[] {
   if (categories === 'allergen') return ALLERGENS
   // 알레르기 재료도 테스트를 마치면 일반 칸에 쓸 수 있어야 해서 함께 보여 준다
-  return INGREDIENT_IDS.filter((id) => (categories as readonly string[]).includes(INGREDIENTS[id].category))
+  const base = INGREDIENT_IDS.filter((id) => (categories as readonly string[]).includes(INGREDIENTS[id].category))
+  // 고기 칸에는 3일 테스트를 마친 달걀·두부도 단백질로 넣을 수 있다 (자동 채우기도 후기에 그렇게 쓴다)
+  return categories.includes('meat') ? [...base, ...PROTEIN_EXTRAS.filter((id) => !base.includes(id))] : base
 }
+
+const PROTEIN_EXTRAS: IngredientId[] = ['egg', 'soybean']
 
 /** 하루 식사 횟수별 기본 시간표 */
 export function mealTemplate(mealsPerDay: number): { time: string; label: string }[] {
