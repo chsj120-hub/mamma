@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from '../auth/AuthProvider'
 import { AppHeader, NotificationButton } from '../components/AppHeader'
 import { AllergenNotice } from '../components/AllergenNotice'
 import { MealsPerDayNotice } from '../components/MealsPerDayNotice'
@@ -15,6 +16,7 @@ import { allergenTestProgress, ironDaysThisWeek } from '../lib/meal'
 
 export function HomePage() {
   const { profile, setProfile, plans, cubes, toggleMealDone, setEatenMl, setTaste, showDoneBy } = useAppData()
+  const { signOutNow } = useAuth()
   const [editing, setEditing] = useState(false)
 
   const today = todayKey()
@@ -69,6 +71,14 @@ export function HomePage() {
         <p className="m-0 px-1 pb-2 text-[11px] leading-relaxed text-muted">
           식단과 영양 정보는 참고용이에요. 아기의 건강 상태나 알레르기가 걱정되면 소아청소년과 진료를 먼저 받아 주세요.
         </p>
+
+        <button
+          type="button"
+          onClick={() => window.confirm('로그아웃할까요?') && void signOutNow()}
+          className="mb-2 min-h-11 self-center rounded-[22px] border border-line bg-card px-5 text-[13px] font-semibold text-sub"
+        >
+          로그아웃
+        </button>
       </main>
 
       <ProfileModal
