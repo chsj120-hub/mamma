@@ -1,7 +1,9 @@
 // 앱 데이터(아기 프로필·식단·홈큐브) 상태. 화면은 useAppData()로만 읽고 쓴다.
 import { useAuth } from '../auth/AuthProvider'
 import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from 'react'
+import { monthsOld } from './date'
 import { newId } from './meal'
+import { STAGES, suggestStage } from './stage'
 import { useStoredState } from './storage'
 import { SAMPLE_PROFILE, SEED_SAMPLE_DATA, sampleCubes, sampleMealPlans } from './seed'
 import type { IngredientId } from './ingredients'
@@ -55,7 +57,13 @@ export const shortName = (name?: string | null) => (name?.trim().slice(0, 10) ||
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const { user, inFamily } = useAuth()
   const myName = shortName(user?.displayName)
-  const [profile, setProfile] = useStoredState<BabyProfile>('profile', SAMPLE_PROFILE)
+  const [storedProfile, setProfile] = useStoredState<BabyProfile>('profile', SAMPLE_PROFILE)
+  // 서버·가족 기록에서 온 프로필에 단계나 이름이 비어 있어도 화면이 깨지지 않게 채운다
+  const profile = useMemo<BabyProfile>(() => {
+    const p = storedProfile
+    const stageOk = p.stage && p.stage in STAGES
+    return stageOk && typeof p.name === 'string' ? p : { ...p, name: typeof p.name === 'string' ? p.name : '', stage: stageOk ? p.stage : suggestStage(monthsOld(p.birthDate)) }
+  }, [storedProfile])
   const [plans, setPlans] = useStoredState<MealPlans>('mealPlans', () => (SEED_SAMPLE_DATA ? sampleMealPlans() : {}))
   const [cubes, setCubes] = useStoredState<Cube[]>('cubes', () => (SEED_SAMPLE_DATA ? sampleCubes() : []))
   const [snapshots, setSnapshots] = useStoredState<Snapshot[]>('snapshots', [])
