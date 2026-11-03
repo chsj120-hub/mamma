@@ -1,10 +1,12 @@
 import { dayCount, dotted } from '../../lib/date'
 import { STAGES } from '../../lib/stage'
 import type { BabyProfile } from '../../lib/types'
+import { useHousehold } from '../../lib/useHousehold'
 
 export function ProfileCard({ profile, onEdit }: { profile: BabyProfile; onEdit: () => void }) {
   const stage = STAGES[profile.stage]
   const days = dayCount(profile.birthDate)
+  const { others } = useHousehold()
 
   return (
     <section aria-label="아기 프로필" className="flex flex-col gap-3.5 rounded-3xl bg-soft p-5">
@@ -18,6 +20,11 @@ export function ProfileCard({ profile, onEdit }: { profile: BabyProfile; onEdit:
             <span className="text-[13px] text-sub">
               {dotted(profile.birthDate)} 출생 · <span className="whitespace-nowrap">{stage.name}</span>
             </span>
+            {others.length > 0 && (
+              <span className="truncate text-xs font-semibold text-ink" role="status">
+                {others.map((p) => p.name).join(', ')}님과 공유 중
+              </span>
+            )}
           </div>
         </div>
         <button type="button" onClick={onEdit} className="h-11 shrink-0 rounded-[22px] border-none bg-card px-3.5 text-[13px] font-semibold text-ink">

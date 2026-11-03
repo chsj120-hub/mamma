@@ -1,31 +1,19 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
-import type { FamilyMember } from '../auth/types'
 import { inputCls } from './home/ProfileFields'
 import { inviteLink } from '../lib/invite'
+import { useHousehold } from '../lib/useHousehold'
 import { Sheet } from './Sheet'
 
 /** 가족과 함께 쓰기: 초대 코드를 만들어 공동 양육자를 초대하거나, 받은 코드로 참여한다 (프로필 수정 창) */
 export function FamilySection() {
-  const { familyEnabled, inFamily, createInvite, listMembers, removeMember, joinFamily, leaveFamily } = useAuth()
+  const { familyEnabled, inFamily, createInvite, removeMember, joinFamily, leaveFamily } = useAuth()
+  const { info, people, refresh } = useHousehold()
   const [invite, setInvite] = useState<{ code: string; expiresAt: string } | null>(null)
-  const [members, setMembers] = useState<FamilyMember[]>([])
   const [code, setCode] = useState('')
   const [confirm, setConfirm] = useState<'join' | 'leave' | null>(null)
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
-
-  const refresh = useCallback(async () => {
-    try {
-      setMembers(inFamily ? [] : await listMembers())
-    } catch {
-      setMembers([])
-    }
-  }, [inFamily, listMembers])
-
-  useEffect(() => {
-    void refresh()
-  }, [refresh])
 
   if (!familyEnabled) return null
 
@@ -79,6 +67,47 @@ export function FamilySection() {
     <section className="flex flex-col gap-2" aria-label="가족과 함께 쓰기">
       <h3 className="m-0 text-[13px] font-semibold text-sub">가족과 함께 쓰기</h3>
       <div className="flex flex-col gap-2.5 rounded-2xl border border-line bg-card p-3.5">
+        {people.length > 1 ? (
+          <div className="flex flex-col gap-1" role="status">
+            <b className="text-[13px]">
+              {people
+                .filter((p) => !p.me)
+                .map((p) => p.name)
+                .join(', ')}
+              님과 공유 중이에요
+            </b>
+            <ul className="m-0 flex list-none flex-col p-0" aria-label="함께 쓰는 사람">
+              {people.map((p) => (
+                <li key={p.uid} className="flex items-center gap-2 border-b border-track py-1.5 text-[13px]">
+                  <span className="flex-1 truncate">
+                    {p.name}
+                    {p.me ? ' (나)' : ''}{' '}
+                    <span className="text-xs text-sub">· {p.role === 'owner' ? '기록 주인' : `${p.joinedAt ? new Date(p.joinedAt).toLocaleDateString('ko-KR') + ' ' : ''}참여`}</span>
+                  </span>
+                  {!inFamily && p.role === 'member' && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={async () => {
+                        if (await run(() => removeMember(p.uid), '내보냈어요.')) void refresh()
+                      }}
+                      className="min-h-11 border-none bg-transparent px-2 text-xs font-semibold text-urgent-ink underline"
+                    >
+                      내보내기
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {info?.serverUpdatedAt && (
+              <span className="text-xs text-sub">
+                서버에 저장된 식단 마지막 수정: {new Date(info.serverUpdatedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
+        ) : (
+          <p className="m-0 text-xs text-sub">지금은 혼자 쓰는 중이에요. 초대하면 함께 쓰는 사람이 여기에 보여요.</p>
+        )}
         {inFamily ? (
           <>
             <p className="m-0 text-[13px] leading-[1.6]">초대받은 가족 기록을 함께 쓰는 중이에요. 식단·홈큐브·성장 기록이 모두 같이 보이고 바뀌어요.</p>
@@ -112,27 +141,6 @@ export function FamilySection() {
                 </div>
                 <span className="text-xs leading-relaxed text-sub">링크를 열면 로그인한 뒤 바로 참여 화면이 나와요. 링크나 코드를 아는 사람은 누구나 참여할 수 있으니 믿는 가족에게만 보내 주세요.</span>
               </div>
-            )}
-            {members.length > 0 && (
-              <ul className="m-0 flex list-none flex-col p-0" aria-label="함께 쓰는 사람">
-                {members.map((m) => (
-                  <li key={m.uid} className="flex items-center gap-2 border-b border-track py-1.5 text-[13px]">
-                    <span className="flex-1 truncate">
-                      {m.name || '가족'} <span className="text-xs text-sub">· {new Date(m.joinedAt).toLocaleDateString('ko-KR')} 참여</span>
-                    </span>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={async () => {
-                        if (await run(() => removeMember(m.uid), '내보냈어요.')) void refresh()
-                      }}
-                      className="min-h-11 border-none bg-transparent px-2 text-xs font-semibold text-urgent-ink underline"
-                    >
-                      내보내기
-                    </button>
-                  </li>
-                ))}
-              </ul>
             )}
             <div className="flex items-center gap-2">
               <input

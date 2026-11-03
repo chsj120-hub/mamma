@@ -86,7 +86,7 @@ const toUser = ({ uid, provider, displayName, email, householdId }: Account): Au
 
 // 가족 공유 흉내: 초대와 참여를 이 브라우저 저장소에서만 처리한다 (다른 기기와는 공유되지 않는다)
 const FAMILY_KEY = 'auth:family'
-type FamilyStore = { invites: Record<string, { owner: string; expiresAt: string }>; members: Record<string, Record<string, Omit<FamilyMember, 'uid'>>> }
+type FamilyStore = { invites: Record<string, { owner: string; expiresAt: string }>; members: Record<string, Record<string, Omit<FamilyMember, 'uid'>>>; owners?: Record<string, string> }
 const readFamily = (): FamilyStore => {
   try {
     return { invites: {}, members: {}, ...(JSON.parse(readRaw(guestPrefix(), FAMILY_KEY) ?? '{}') as Partial<FamilyStore>) }
@@ -125,6 +125,15 @@ const mockFamily: FamilyService = {
     const accounts = readAccounts()
     if (accounts[uid]) writeAccounts({ ...accounts, [uid]: { ...accounts[uid], householdId: invite.owner } })
     return { ok: true, ownerUid: invite.owner }
+  },
+  async household(uid, dataUid, myName) {
+    const f = readFamily()
+    if (dataUid === uid && f.owners?.[uid] !== myName) {
+      f.owners = { ...f.owners, [uid]: myName }
+      writeFamily(f)
+    }
+    const members = Object.entries(f.members[dataUid] ?? {}).map(([m, v]) => ({ uid: m, ...v }))
+    return { ownerUid: dataUid, ownerName: f.owners?.[dataUid] ?? '', members }
   },
   async leave(uid, ownerUid) {
     const f = readFamily()

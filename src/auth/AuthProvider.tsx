@@ -7,7 +7,7 @@ import { isSyncKey, SYNC_KEYS } from '../lib/cloud'
 import { adoptGuestData, clearPrefix, guestPrefix, notifyRemoteChange, readRaw, removeRaw, setSaveListener, setStoragePrefix, userPrefix, writeRaw } from '../lib/storage'
 import { authService } from './index'
 import { hasKakaoCallback } from './kakao'
-import type { AuthUser, DeleteAccountResult, FamilyMember, FamilyResult, Provider, SignInOptions, SignInResult } from './types'
+import type { AuthUser, DeleteAccountResult, FamilyInfo, FamilyMember, FamilyResult, Provider, SignInOptions, SignInResult } from './types'
 
 export type SyncStatus = 'off' | 'idle' | 'saving' | 'saved' | 'error'
 /** 로그인 화면에 띄우는 안내 */
@@ -38,6 +38,8 @@ type AuthCtx = {
   inFamily: boolean
   createInvite: () => Promise<FamilyResult<{ code: string; expiresAt: string }>>
   listMembers: () => Promise<FamilyMember[]>
+  /** 함께 쓰는 사람(기록 주인 + 참여자). 가족 공유를 쓰지 않으면 null */
+  household: () => Promise<FamilyInfo | null>
   removeMember: (memberUid: string) => Promise<FamilyResult>
   /** 초대 코드로 참여: 이 기기의 기록이 초대한 사람의 기록으로 바뀐다 */
   joinFamily: (code: string) => Promise<FamilyResult>
@@ -339,6 +341,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const familyOff = { ok: false, message: '가족 공유는 로그인한 뒤 서버 저장을 쓸 때만 쓸 수 있어요.' } as const
 
   const createInvite = useCallback(async () => (family && uidRef.current ? family.createInvite(uidRef.current) : familyOff), [family])
+  const household = useCallback(async (): Promise<FamilyInfo | null> => {
+    const u = userRef.current
+    return family && u ? family.household(u.uid, u.dataUid, u.displayName).catch(() => null) : null
+  }, [family])
   const listMembers = useCallback(async () => (family && uidRef.current ? family.listMembers(uidRef.current) : []), [family])
   const removeMember = useCallback(async (memberUid: string) => (family && uidRef.current ? family.removeMember(uidRef.current, memberUid) : familyOff), [family])
 
@@ -387,11 +393,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       inFamily,
       createInvite,
       listMembers,
+      household,
       removeMember,
       joinFamily,
       leaveFamily,
     }),
-    [user, onboarded, consented, signingIn, notice, loginError, syncStatus, syncError, signIn, signOutNow, completeOnboarding, recordConsent, deleteAccount, familyEnabled, inFamily, createInvite, listMembers, removeMember, joinFamily, leaveFamily],
+    [user, onboarded, consented, signingIn, notice, loginError, syncStatus, syncError, signIn, signOutNow, completeOnboarding, recordConsent, deleteAccount, familyEnabled, inFamily, createInvite, listMembers, removeMember, household, joinFamily, leaveFamily],
   )
 
   if (!ready) {

@@ -50,6 +50,16 @@ export type CloudAdapter = {
 
 export type FamilyMember = { uid: string; name: string; joinedAt: string }
 
+/** 지금 함께 쓰는 사람들 (기록 주인 + 참여한 보호자). 프로필에 '누구와 공유 중'을 보여 주는 용도 */
+export type FamilyInfo = {
+  ownerUid: string
+  /** 기록 주인(초대한 사람)의 표시 이름. 아직 모르면 '' */
+  ownerName: string
+  members: FamilyMember[]
+  /** 서버에 저장된 식단 기록이 마지막으로 바뀐 시각(ISO). 다른 사람의 수정이 도착하는지 확인하는 용도 */
+  serverUpdatedAt?: string
+}
+
 export type FamilyResult<T = object> = ({ ok: true } & T) | { ok: false; message: string }
 
 /** 가족 공유: 한 사람이 초대 코드를 만들고, 다른 보호자가 코드로 참여하면 같은 기록(식단·큐브 등)을 함께 쓴다 */
@@ -59,6 +69,8 @@ export type FamilyService = {
   removeMember(ownerUid: string, memberUid: string): Promise<FamilyResult>
   join(uid: string, name: string, code: string): Promise<FamilyResult<{ ownerUid: string }>>
   leave(uid: string, ownerUid: string): Promise<FamilyResult>
+  /** 함께 쓰는 사람 목록. 기록 주인이면 내 이름을 서버에 남겨 참여한 사람도 볼 수 있게 한다 */
+  household(uid: string, dataUid: string, myName: string): Promise<FamilyInfo>
 }
 
 export interface AuthService {

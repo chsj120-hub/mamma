@@ -37,8 +37,9 @@ async function readRegistry(uid: string): Promise<Registry | null> {
   let householdId = typeof snap.data().householdId === 'string' ? (snap.data().householdId as string) : uid
   if (householdId !== uid) {
     const { getDoc: get } = await import('firebase/firestore')
-    const member = await get(doc(db, 'users', householdId, 'members', uid)).catch(() => null)
-    if (!member?.exists()) {
+    // 읽기에 실패한 것(네트워크·일시 오류)은 '참여자가 아니다'로 보지 않는다. 실제로 기록이 없을 때만 내 기록으로 돌아온다
+    const isMember = await get(doc(db, 'users', householdId, 'members', uid)).then((m) => m.exists(), () => null)
+    if (isMember === false) {
       householdId = uid
       void import('firebase/firestore').then(({ updateDoc }) => updateDoc(doc(db, 'users', uid), { householdId: uid })).catch(() => {})
     }
@@ -134,6 +135,32 @@ const family: FamilyService = {
     } catch (e) {
       return { ok: false, message: describeFirestoreError(e, '참여하지 못했어요. 코드를 확인하고 다시 시도해 주세요.') }
     }
+  },
+
+  async household(uid, dataUid, myName) {
+    const [db, fs] = await Promise.all([getDb(), import('firebase/firestore')])
+    const isOwner = dataUid === uid
+    let ownerName = isOwner ? myName : ''
+    if (isOwner) {
+      // 참여한 사람이 '누구와 공유 중'을 볼 수 있게 내 이름을 남겨 둔다 (바뀐 때만 쓴다)
+      try {
+        const ref = fs.doc(db, 'households', uid)
+        const cur = await fs.getDoc(ref)
+        if (!cur.exists() || cur.data().name !== myName.slice(0, 40)) await fs.setDoc(ref, { name: myName.slice(0, 40) })
+      } catch {
+        // 이름을 못 남겨도 목록은 보여 준다
+      }
+    } else {
+      ownerName = await fs.getDoc(fs.doc(db, 'households', dataUid)).then((s) => (s.exists() ? String(s.data().name ?? '') : ''), () => '')
+    }
+    const members = await fs
+      .getDocs(fs.collection(db, 'users', dataUid, 'members'))
+      .then((snap) => snap.docs.map((d) => ({ uid: d.id, name: String(d.data().name ?? ''), joinedAt: String(d.data().joinedAt ?? '') })))
+      .catch(() => [] as { uid: string; name: string; joinedAt: string }[])
+    const serverUpdatedAt = await fs
+      .getDoc(fs.doc(db, 'users', dataUid, 'data', 'mealPlans'))
+      .then((s) => (s.exists() ? (s.data().updatedAt?.toDate?.().toISOString() as string | undefined) : undefined), () => undefined)
+    return { ownerUid: dataUid, ownerName, members, serverUpdatedAt }
   },
 
   async leave(uid, ownerUid) {
@@ -286,6 +313,7 @@ export const firebaseAuthService: AuthService = {
         // 내 가족 기록에 참여한 사람들의 참여 기록을 먼저 지운다
         const members = await fs.getDocs(fs.collection(db, 'users', uid, 'members'))
         await Promise.all(members.docs.map((m) => fs.deleteDoc(m.ref)))
+        await fs.deleteDoc(fs.doc(db, 'households', uid)).catch(() => {})
       }
       // 데이터 문서 → 가입 기록 → 로그인 계정 순서 (규칙이 가입 기록이 있어야 데이터 쓰기를 허용한다)
       await Promise.all(SYNC_KEYS.map((key) => fs.deleteDoc(fs.doc(db, 'users', uid, 'data', key))))
