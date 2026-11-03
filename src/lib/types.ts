@@ -12,7 +12,7 @@ export type BabyProfile = {
   mealsPerDay: number
   /** 끼니별 먹는 시간 (HH:mm). 하루 식사 횟수와 같은 개수. 없으면 기본 시간 */
   mealTimes?: string[]
-  /** 시판 알레르기 키트(스푼타임 스타트킷 등)를 함께 쓰는지. 켜면 알레르기 추천에 키트 재료를 모두 넣는다 */
+  /** 시판 알레르기 키트(원물 파우더를 이유식에 섞는 형태)를 함께 쓰는지. 켜면 알레르기 추천에 키트 재료를 모두 넣는다 */
   allergenKit?: boolean
 }
 

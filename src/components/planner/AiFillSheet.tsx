@@ -88,11 +88,11 @@ export function AiFillSheet({ dates, today, onClose, onDone }: Props) {
         <div className="flex flex-col gap-1.5 rounded-xl bg-card p-3">
           <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[13px] font-semibold">
             <input type="checkbox" checked={kit} onChange={(e) => toggleKit(e.target.checked)} className="m-0 size-5 accent-ink" />
-            시판 알레르기 키트를 같이 써요 ({KIT_NAME} 기준)
+            {KIT_NAME}를 같이 써요
           </label>
           <p className="m-0 text-xs leading-relaxed text-sub">
             {kit
-              ? '키트에 있는 재료(밀·땅콩·대두·메밀·참깨·새우·조개·흰살생선·호두·게)를 식단표 순서대로 추천해요. 새우·게·호두는 9개월부터 나와요. 키트의 흰살생선은 앱에서 "대구살"로 기록해요. 달걀·우유(요거트)는 키트에 없으니 직접 준비해 주세요. 키트 구성은 바뀔 수 있어 포장의 원재료 표시를 꼭 확인해 주세요.'
+              ? '흔한 시판 키트에 들어 있는 재료(밀·땅콩·대두·메밀·참깨·새우·조개·흰살생선·호두·게)를 순서대로 추천해요. 제품마다 구성이 다를 수 있어요. 새우·게·호두는 9개월부터 나와요. 키트의 흰살생선은 앱에서 "대구살"로 기록해요. 달걀·우유(요거트)는 키트에 없으니 직접 준비해 주세요. 키트 구성은 바뀔 수 있어 포장의 원재료 표시를 꼭 확인해 주세요.'
               : '키트를 사서 쓴다면 체크해 주세요. 키트에 들어 있는 재료를 순서에 맞춰 추천하고, 키트에 없는 재료(달걀·우유 등)는 직접 준비하라고 알려 드려요.'}
           </p>
         </div>
