@@ -5,7 +5,7 @@ import { addDays, dayCount, daysInMonth, DOW_KO, dowOf, koreanTime, md } from '.
 import { ingredientName, type IngredientId } from '../../lib/ingredients'
 import { allergenStreak, daySummary, mealItems, sortMeals } from '../../lib/meal'
 import { checkedOn, currentGroup, GROUP_NAMES, isChecked, MILESTONE_GROUPS, milestoneKey, MILESTONES } from '../../lib/milestones'
-import { dotDate, periodStart, shortDot, type PrintSettings } from '../../lib/print'
+import { dotDate, OPTION_FOR, periodStart, shortDot, type PrintSettings } from '../../lib/print'
 import { ingredientTests, periodDates, periodSummary, triedIngredients, weekIntake, weekLabel } from '../../lib/report'
 import { CATEGORY_LABEL } from '../cube/categories'
 import { IngredientIcon } from '../IngredientIcon'
@@ -20,6 +20,9 @@ type Props = { settings: PrintSettings; today: string }
 export function PrintDocument({ settings, today }: Props) {
   const { profile, plans, cubes, reactions, milestones } = useAppData()
   const { kind, options } = settings
+  const allowed = OPTION_FOR[kind]
+  const showMemo = options.memo && allowed.includes('memo')
+  const showShopping = options.shopping && allowed.includes('shopping')
   const start = periodStart(kind, settings.range, settings.customDate, today)
   const end = kind === 'month' ? addDays(start, daysInMonth(start) - 1) : addDays(start, 6)
 
@@ -40,7 +43,7 @@ export function PrintDocument({ settings, today }: Props) {
     allergen: `${dotDate(today)} 기준`,
   }[kind]
 
-  const icon = (id: IngredientId, size = 14) => (options.icons ? <IngredientIcon id={id} size={size} className="shrink-0" /> : null)
+  const icon = (id: IngredientId, size = 18) => (options.icons ? <IngredientIcon id={id} size={size} className="shrink-0" /> : null)
 
   // 장보기: 재료별 합계가 2개 미만
   const totals = new Map<IngredientId, number>()
@@ -48,10 +51,10 @@ export function PrintDocument({ settings, today }: Props) {
   const shopping = [...totals].filter(([, n]) => n < LOW_STOCK_UNDER).map(([id]) => id)
 
   return (
-    <article className="flex h-full flex-col gap-[3mm] bg-white font-sans text-[11px] leading-snug text-text [print-color-adjust:exact] [-webkit-print-color-adjust:exact]">
+    <article className="flex h-full flex-col gap-[3mm] bg-white font-sans text-[14px] leading-snug text-text [print-color-adjust:exact] [-webkit-print-color-adjust:exact]">
       <header className="flex items-end justify-between border-b-2 border-accent pb-[2mm]">
-        <h1 className="m-0 font-display text-[20px] font-normal">{title}</h1>
-        <span className="text-[10px] text-sub">{rangeLabel}</span>
+        <h1 className="m-0 font-display text-[28px] font-normal">{title}</h1>
+        <span className="text-[13px] text-sub">{rangeLabel}</span>
       </header>
 
       {kind === 'week' && <WeekSheet start={start} plans={plans} icon={icon} showAllergen={options.allergen} today={today} />}
@@ -61,9 +64,9 @@ export function PrintDocument({ settings, today }: Props) {
       )}
       {kind === 'allergen' && <AllergenRecordSheet today={today} />}
       {kind === 'cube' && (
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full border-collapse text-[14px]">
           <thead>
-            <tr className="border-b border-line text-left text-[10px] text-sub">
+            <tr className="border-b border-line text-left text-[13px] text-sub">
               {['재료', '분류', '수량', '제조·구매일', '소진 기한', '상태'].map((h) => (
                 <th key={h} className="py-[1.5mm] font-semibold">
                   {h}
@@ -82,7 +85,7 @@ export function PrintDocument({ settings, today }: Props) {
                       <span className="flex items-center gap-1.5 font-semibold">
                         {icon(c.ingredient)}
                         {ingredientName(c.ingredient)}
-                        {isStore(c) && <span className="text-[9px] font-normal text-sub">(시판)</span>}
+                        {isStore(c) && <span className="text-[12px] font-normal text-sub">(시판)</span>}
                       </span>
                     </td>
                     <td className="text-sub">{CATEGORY_LABEL[c.ingredient]}</td>
@@ -104,9 +107,9 @@ export function PrintDocument({ settings, today }: Props) {
         <div className="grid grid-cols-1 gap-[3mm]">
           {MILESTONE_GROUPS.map((g) => (
             <section key={g} className="flex flex-col gap-[1mm]">
-              <h2 className="m-0 text-[12px] font-bold">
+              <h2 className="m-0 text-[16px] font-bold">
                 {GROUP_NAMES[g]}
-                {g === currentGroup(profile.birthDate, today) && <span className="ml-1.5 text-[10px] font-semibold text-ink">지금 단계</span>}
+                {g === currentGroup(profile.birthDate, today) && <span className="ml-1.5 text-[13px] font-semibold text-ink">지금 단계</span>}
               </h2>
               {MILESTONES[g].map((m, i) => {
                 const key = milestoneKey(g, i)
@@ -116,7 +119,7 @@ export function PrintDocument({ settings, today }: Props) {
                   <div key={key} className="flex items-center gap-2 border-b border-track py-[1mm]">
                     <Box checked={on} />
                     <span className="flex-1">{m.text}</span>
-                    <span className="text-[10px] text-sub">{on ? (date ? `${shortDot(date)} 체크` : '체크함') : ''}</span>
+                    <span className="text-[13px] text-sub">{on ? (date ? `${shortDot(date)} 체크` : '체크함') : ''}</span>
                   </div>
                 )
               })}
@@ -125,9 +128,9 @@ export function PrintDocument({ settings, today }: Props) {
         </div>
       )}
 
-      {options.shopping && (kind === 'week' || kind === 'month' || kind === 'cube') && (
+      {showShopping && (kind === 'week' || kind === 'cube') && (
         <section className="flex flex-col gap-[1mm]">
-          <h2 className="m-0 text-[12px] font-bold">장보기 · 만들 큐브</h2>
+          <h2 className="m-0 text-[16px] font-bold">장보기 · 만들 큐브</h2>
           {shopping.length === 0 ? (
             <span className="text-sub">부족한 재료가 없어요.</span>
           ) : (
@@ -144,16 +147,16 @@ export function PrintDocument({ settings, today }: Props) {
         </section>
       )}
 
-      {options.memo && (
+      {showMemo && (
         <section className="mt-auto flex flex-col gap-[5mm] pt-[2mm]">
-          <h2 className="m-0 text-[12px] font-bold">메모</h2>
+          <h2 className="m-0 text-[16px] font-bold">메모</h2>
           <span className="border-b border-plan-dot" />
           <span className="border-b border-plan-dot" />
           <span className="border-b border-plan-dot" />
         </section>
       )}
 
-      <footer className={`flex justify-between border-t border-line pt-[1.5mm] text-[9px] text-muted ${options.memo ? '' : 'mt-auto'}`}>
+      <footer className={`flex flex-wrap justify-between gap-x-4 border-t border-line pt-[1.5mm] text-[12px] text-muted ${showMemo ? '' : 'mt-auto'}`}>
         <span>맘마 이유식 플래너 · {dotDate(today)} 출력</span>
         <span>식단·영양 정보는 참고용이에요. 걱정되면 소아청소년과와 상의해 주세요.</span>
       </footer>
@@ -163,7 +166,7 @@ export function PrintDocument({ settings, today }: Props) {
 
 function Box({ checked = false }: { checked?: boolean }) {
   return (
-    <span className="flex size-[3.2mm] shrink-0 items-center justify-center rounded-[0.6mm] border border-[#A8937C] text-[8px] leading-none font-bold text-done">
+    <span className="flex size-[4.2mm] shrink-0 items-center justify-center rounded-[0.6mm] border border-[#A8937C] text-[11px] leading-none font-bold text-done">
       {checked ? '✓' : ''}
     </span>
   )
@@ -174,21 +177,21 @@ type SheetProps = { start: string; plans: ReturnType<typeof useAppData>['plans']
 function WeekSheet({ start, plans, icon, showAllergen }: SheetProps) {
   return (
     <div className="flex flex-col">
-      <p className="m-0 pb-[1mm] text-[10px] text-sub">베이스 쌀은 생략했어요. 먹은 끼니는 □에 체크해 주세요.</p>
+      <p className="m-0 pb-[1mm] text-[13px] text-sub">베이스 쌀은 생략했어요. 먹은 끼니는 □에 체크해 주세요.</p>
       {Array.from({ length: 7 }, (_, i) => {
         const date = addDays(start, i)
         const meals = sortMeals(plans[date]?.meals ?? [])
         const dow = dowOf(date)
         return (
           <div key={date} className="flex gap-[3mm] border-b border-track py-[1.6mm]">
-            <span className={`w-[12mm] shrink-0 font-bold ${dow === 0 ? 'text-urgent' : dow === 6 ? 'text-sat' : ''}`}>
+            <span className={`w-[15mm] shrink-0 font-bold ${dow === 0 ? 'text-urgent' : dow === 6 ? 'text-sat' : ''}`}>
               {DOW_KO[dow]} {md(date).day}
             </span>
             <div className="flex flex-1 flex-col gap-[1mm]">
               {meals.length === 0 && <span className="text-muted">식단 없음</span>}
               {meals.map((m) => (
                 <div key={m.id} className="flex items-center gap-2">
-                  <span className="w-[16mm] shrink-0 text-[10px] text-sub">
+                  <span className="w-[22mm] shrink-0 text-[13px] text-sub">
                     {m.label} {koreanTime(m.time).replace('오전 ', '').replace('오후 ', '')}
                   </span>
                   <span className="flex flex-1 flex-wrap items-center gap-x-2.5 gap-y-0.5">
@@ -201,7 +204,7 @@ function WeekSheet({ start, plans, icon, showAllergen }: SheetProps) {
                         </span>
                       ))}
                     {showAllergen && m.allergen && (
-                      <span className="rounded-[1mm] bg-allergy-bg px-1 text-[9.5px] font-bold text-allergy">
+                      <span className="rounded-[1mm] bg-allergy-bg px-1 text-[12.5px] font-bold text-allergy">
                         {ingredientName(m.allergen)} {allergenStreak(plans, date, m.allergen)}일차
                       </span>
                     )}
@@ -222,7 +225,7 @@ function MonthSheet({ start, plans, icon, showAllergen }: SheetProps) {
   const count = daysInMonth(start)
   return (
     <div className="flex flex-1 flex-col">
-      <div className="grid grid-cols-7 gap-[1mm] pb-[1mm] text-center text-[10px] font-semibold text-sub">
+      <div className="grid grid-cols-7 gap-[1mm] pb-[1mm] text-center text-[15px] font-semibold text-sub">
         {DOW_KO.map((d) => (
           <span key={d}>{d}</span>
         ))}
@@ -236,24 +239,24 @@ function MonthSheet({ start, plans, icon, showAllergen }: SheetProps) {
           const s = daySummary(plans[date])
           const al = showAllergen && s.allergen
           return (
-            <div key={date} className={`flex min-h-[20mm] flex-col gap-[0.5mm] overflow-hidden rounded-[1mm] border p-[1mm] ${al ? 'border-allergy-ring bg-allergy-soft' : 'border-line'}`}>
-              <span className="flex justify-between text-[9.5px] font-bold">
+            <div key={date} className={`flex min-h-[20mm] flex-col gap-[0.6mm] overflow-hidden rounded-[1mm] border p-[1.5mm] ${al ? 'border-allergy-ring bg-allergy-soft' : 'border-line'}`}>
+              <span className="flex justify-between text-[15px] font-bold">
                 {md(date).day}
                 {s.status === 'done' && <span className="text-done">✓</span>}
               </span>
               {s.mains.slice(0, 4).map((id) => (
-                <span key={id} className="flex items-center gap-0.5 truncate text-[8.5px] leading-tight">
-                  {icon(id, 10)}
+                <span key={id} className="flex items-center gap-0.5 truncate text-[14px] leading-tight">
+                  {icon(id, 17)}
                   {ingredientName(id)}
                 </span>
               ))}
-              {s.mains.length > 4 && <span className="text-[8px] text-muted">+{s.mains.length - 4}</span>}
-              {al && s.allergen && <span className="mt-auto truncate text-[8px] font-bold text-allergy">{ingredientName(s.allergen)} {allergenStreak(plans, date, s.allergen)}일차</span>}
+              {s.mains.length > 4 && <span className="text-[13px] text-muted">+{s.mains.length - 4}</span>}
+              {al && s.allergen && <span className="mt-auto truncate text-[13px] font-bold text-allergy">{ingredientName(s.allergen)} {allergenStreak(plans, date, s.allergen)}일차</span>}
             </div>
           )
         })}
       </div>
-      <p className="m-0 pt-[1mm] text-[9px] text-sub">베이스 쌀 생략 · ✓ 그날 모두 먹음{showAllergen ? ' · 보라 칸: 알레르기 테스트' : ''}</p>
+      <p className="m-0 pt-[1mm] text-[13px] text-sub">베이스 쌀 생략 · ✓ 그날 모두 먹음{showAllergen ? ' · 보라 칸: 알레르기 테스트' : ''}</p>
     </div>
   )
 }
@@ -276,37 +279,37 @@ function ReportSheet({ start, plans, today, target, icon, showAllergen, reaction
       <div className="grid grid-cols-4 gap-[2mm]">
         {kpis.map(([label, value, sub]) => (
           <div key={label} className="flex flex-col rounded-[1.5mm] border border-line p-[2mm]">
-            <span className="text-[9px] text-sub">{label}</span>
-            <span className="font-display text-[16px]">{value}</span>
-            <span className="truncate text-[8.5px] text-sub">{sub}</span>
+            <span className="text-[12px] text-sub">{label}</span>
+            <span className="font-display text-[22px]">{value}</span>
+            <span className="truncate text-[11.5px] text-sub">{sub}</span>
           </div>
         ))}
       </div>
 
       <section className="flex flex-col gap-[1mm]">
-        <h2 className="m-0 text-[12px] font-bold">하루 섭취량</h2>
+        <h2 className="m-0 text-[16px] font-bold">하루 섭취량</h2>
         <div className="relative grid h-[34mm] grid-cols-7 items-end gap-[3mm] border-b border-line">
           <div className="absolute inset-x-0 border-t border-dashed border-sub" style={{ bottom: `${(target / max) * 100}%` }} />
           {days.map((d) => (
             <div key={d.date} className="flex h-full flex-col items-center justify-end gap-0.5">
-              <span className="text-[8.5px] text-sub">{d.ml != null && d.date <= today ? d.ml : ''}</span>
+              <span className="text-[11.5px] text-sub">{d.ml != null && d.date <= today ? d.ml : ''}</span>
               <div className={`w-full rounded-t-[1mm] ${d.iron ? 'bg-accent' : 'bg-bar-off'}`} style={{ height: d.ml != null && d.date <= today ? `${(d.ml / max) * 100}%` : 0 }} />
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-[3mm] text-center text-[9px] text-sub">
+        <div className="grid grid-cols-7 gap-[3mm] text-center text-[12px] text-sub">
           {days.map((d) => (
             <span key={d.date}>
               {DOW_KO[dowOf(d.date)]} {md(d.date).day}
             </span>
           ))}
         </div>
-        <span className="text-[9px] text-sub">진한 막대: 소고기(철분) 포함 · 점선: 하루 목표 {target}ml</span>
+        <span className="text-[12px] text-sub">진한 막대: 소고기(철분) 포함 · 점선: 하루 목표 {target}ml</span>
       </section>
 
       {showAllergen && (
         <section className="flex flex-col gap-[1mm]">
-          <h2 className="m-0 text-[12px] font-bold">알레르기·새 재료 3일 테스트</h2>
+          <h2 className="m-0 text-[16px] font-bold">알레르기·새 재료 3일 테스트</h2>
           {tests.length === 0 ? (
             <span className="text-sub">아직 기록이 없어요.</span>
           ) : (
@@ -316,10 +319,10 @@ function ReportSheet({ start, plans, today, target, icon, showAllergen, reaction
                   {icon(t.id)}
                   <span className="flex-1 font-semibold">
                     {ingredientName(t.id)}
-                    {t.allergen && <span className="ml-1 text-[8.5px] font-normal text-allergy">주의</span>}
+                    {t.allergen && <span className="ml-1 text-[11.5px] font-normal text-allergy">주의</span>}
                   </span>
-                  <span className="text-[9px] text-sub">{t.first ? shortDot(t.first) : t.next ? `${shortDot(t.next)} 예정` : ''}</span>
-                  <span className="w-[22mm] text-right text-[9.5px] font-bold">{testBadge(t.status, t.days).text}</span>
+                  <span className="text-[12px] text-sub">{t.first ? shortDot(t.first) : t.next ? `${shortDot(t.next)} 예정` : ''}</span>
+                  <span className="w-[30mm] text-right text-[12.5px] font-bold">{testBadge(t.status, t.days).text}</span>
                 </div>
               ))}
             </div>
@@ -328,7 +331,7 @@ function ReportSheet({ start, plans, today, target, icon, showAllergen, reaction
       )}
 
       <section className="flex flex-col gap-[1mm]">
-        <h2 className="m-0 text-[12px] font-bold">먹어본 재료 {tried.length}종</h2>
+        <h2 className="m-0 text-[16px] font-bold">먹어본 재료 {tried.length}종</h2>
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           {tried.length === 0 && <span className="text-sub">완료한 끼니가 아직 없어요.</span>}
           {tried.map((id) => (
@@ -357,13 +360,13 @@ function AllergenRecordSheet({ today }: { today: string }) {
   const born = profile.birthDate ? `${dotDate(profile.birthDate)}생` : ''
   return (
     <div className="flex flex-1 flex-col gap-[3mm]">
-      <p className="m-0 text-[11px]">
+      <p className="m-0 text-[14px]">
         <b>{profile.name}</b> {born}
         {profile.birthDate ? ` · 생후 ${dayCount(profile.birthDate, today)}일` : ''}
       </p>
-      <table className="w-full border-collapse text-[11px]">
+      <table className="w-full border-collapse text-[14px]">
         <thead>
-          <tr className="border-b border-line text-left text-[10px] text-sub">
+          <tr className="border-b border-line text-left text-[13px] text-sub">
             {['알레르기 재료', '처음 먹인 날', '연속 일수', '기록', '진료 메모'].map((h) => (
               <th key={h} className="py-[1.5mm] font-semibold">
                 {h}
@@ -391,9 +394,9 @@ function AllergenRecordSheet({ today }: { today: string }) {
         </tbody>
       </table>
       <div className="flex min-h-[28mm] flex-1 flex-col gap-1 rounded-[2mm] border border-line p-[3mm]">
-        <b className="text-[10px] text-sub">증상·반응 메모 (날짜, 어떤 증상이었는지)</b>
+        <b className="text-[13px] text-sub">증상·반응 메모 (날짜, 어떤 증상이었는지)</b>
       </div>
-      <p className="m-0 text-[9px] leading-snug text-sub">
+      <p className="m-0 text-[12px] leading-snug text-sub">
         맘마에 기록된 날짜와 반응 표시를 정리한 자료예요. 진단 자료가 아니라 진료 때 참고용으로 보여 드리는 용도예요. 두드러기·구토·숨쉬기 힘든 모습이 보이면 바로 진료를 받아 주세요.
       </p>
     </div>

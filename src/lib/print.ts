@@ -28,7 +28,7 @@ export const PRINT_KINDS: { id: PrintKind; name: string; sub: string }[] = [
 /** 종류마다 의미 있는 '포함할 항목' */
 export const OPTION_FOR: Record<PrintKind, (keyof PrintOptions)[]> = {
   week: ['icons', 'allergen', 'shopping', 'memo'],
-  month: ['icons', 'allergen', 'shopping', 'memo'],
+  month: ['icons', 'allergen'],
   report: ['icons', 'allergen', 'memo'],
   cube: ['icons', 'shopping', 'memo'],
   milestone: ['memo'],
